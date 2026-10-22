@@ -60,6 +60,21 @@ test('applyOutcomes refreshes sourcePath for unchanged and leaves failed/refused
   assert.equal(applyOutcomes({ version: 1, views: {} }, [outcome('N', 'failed')], [view('N')], ctx, []).views.N, undefined);
 });
 
+test('applyOutcomes records a created model with unknown spec hash and keeps a failed-but-owned model for a retry', () => {
+  const lock: Lock = { version: 1, views: { K: entry({ dataModelId: 'k1' }) } };
+  const out = applyOutcomes(lock, [
+    outcome('C', 'created', { dataModelId: 'c1', specSha256: '' }),
+    outcome('K', 'failed', { dataModelId: 'k1', keepInLock: true }),
+    outcome('N', 'failed', { dataModelId: 'n1', keepInLock: true }),
+  ], [view('C'), view('K'), view('N')], ctx, []);
+  assert.equal(out.views.C.dataModelId, 'c1');
+  assert.equal(out.views.C.specSha256, '');
+  assert.equal(out.views.K.dataModelId, 'k1');
+  assert.equal(out.views.K.sourceSha256, '', 'forces the view to be reprocessed next run');
+  assert.equal(out.views.N.dataModelId, 'n1');
+  assert.equal(out.views.N.sourceSha256, '');
+});
+
 test('applyOutcomes marks orphans and clears a rediscovered orphan', () => {
   const lock: Lock = { version: 1, views: { GONE: entry(), BACK: entry({ orphaned: true }) } };
   const out = applyOutcomes(lock, [outcome('BACK', 'unchanged')], [view('BACK')], ctx, ['GONE']);

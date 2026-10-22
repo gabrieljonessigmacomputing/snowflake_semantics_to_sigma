@@ -171,9 +171,9 @@ export async function run(cfg: Config, deps: RunDeps): Promise<RunResult> {
     result.warnings.push(...warnings);
     const { name: _name, ...spec } = (conversion.model ?? {}) as Record<string, unknown>;
     const effectiveLock = decision.kind === 'update' ? lockEntry : undefined;
-    result.outcomes.push(
-      await executeView(client, { view: v, decision, spec, modelName, folderId, lockEntry: effectiveLock, findings: conversion.findings, dryRun: cfg.dryRun, preUpdateDir }),
-    );
+    const outcome = await executeView(client, { view: v, decision, spec, modelName, folderId, lockEntry: effectiveLock, findings: conversion.findings, dryRun: cfg.dryRun, preUpdateDir });
+    result.warnings.push(...(outcome.warnings ?? []));
+    result.outcomes.push(outcome);
   }
 
   // Views whose file errored this run were not seen, not removed: keep them out of the orphan list.

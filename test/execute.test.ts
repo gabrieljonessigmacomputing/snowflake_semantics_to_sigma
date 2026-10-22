@@ -14,12 +14,21 @@ class FakeSigma implements SigmaWriter {
   calls: { op: string; id?: string; body?: unknown }[] = [];
   errorColumnsFor = new Set<string>();
   failOn?: string;
+  failAlso?: string;
+  /** create succeeds in Sigma but the response is lost (gateway timeout). */
+  createLost = false;
   private n = 0;
-  private check(op: string) { if (this.failOn === op) throw new SigmaApiError(`Sigma ${op}`, 500, '{}', 'boom'); }
+  private check(op: string) { if (this.failOn === op || this.failAlso === op) throw new SigmaApiError(`Sigma ${op}`, 500, '{}', 'boom'); }
+  async listDataModelsInFolder(folderId: string) {
+    this.calls.push({ op: 'list', id: folderId });
+    return [...this.models].filter(([, m]) => m.folderId === folderId).map(([id, m]) => ({ id, name: String(m.name) }));
+  }
   async getDataModelSpec(id: string) { this.calls.push({ op: 'get', id }); this.check('get'); const m = this.models.get(id); return m ? structuredClone(m) : null; }
   async createDataModel(spec: Record<string, unknown>, name: string, folderId: string) {
     this.calls.push({ op: 'create', body: { spec, name, folderId } }); this.check('create');
-    const id = `new-${++this.n}`; this.models.set(id, { ...structuredClone(spec), name, id }); return id;
+    const id = `new-${++this.n}`; this.models.set(id, { ...structuredClone(spec), name, id, folderId });
+    if (this.createLost) throw new SigmaApiError('Sigma data model creation', 504, '', 'gateway timeout');
+    return id;
   }
   async updateDataModel(id: string, spec: Record<string, unknown>) {
     this.calls.push({ op: 'update', id, body: structuredClone(spec) }); this.check('update');
@@ -122,21 +131,25 @@ test('adopt saves pre-spec', async () => {
   assert.deepEqual(JSON.parse(readFileSync(join(args.preUpdateDir as string, 'D.S.V.json'), 'utf8')), { pages: ['hand built'] });
 });
 
-test('api error marks failed without further writes', async () => {
+test('a failed update is rolled back; if the rollback fails too the model stays owned', async () => {
   const s = new FakeSigma();
   s.models.set('dm1', { pages: [] });
   s.failOn = 'update';
   const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: lockFor(s, 'dm1') }));
   assert.equal(o.status, 'failed');
   assert.match(o.error!, /boom/);
-  assert.equal(s.writes().length, 1);
+  assert.deepEqual(s.writes().map(c => c.op), ['update', 'update'], 'the update, then the rollback attempt');
+  assert.equal(o.keepInLock, true);
+  assert.equal(o.dataModelId, 'dm1');
+});
 
-  const s2 = new FakeSigma();
-  s2.failOn = 'columns';
-  const o2 = await executeView(s2, base({ kind: 'create' }));
-  assert.equal(o2.status, 'failed');
-  assert.equal(o2.dataModelId, 'new-1');
-  assert.deepEqual(s2.writes().map(c => c.op), ['create']);
+test('a non-ambiguous create error makes no further calls', async () => {
+  const s = new FakeSigma();
+  s.createDataModel = async () => { throw new SigmaApiError('Sigma data model creation', 400, '{}', 'bad spec'); };
+  const o = await executeView(s, base({ kind: 'create' }));
+  assert.equal(o.status, 'failed');
+  assert.match(o.error!, /bad spec/);
+  assert.deepEqual(s.calls, []);
 });
 
 test('update of a model that vanished fails', async () => {
@@ -172,4 +185,75 @@ test('update PUTs the live ids for unchanged objects and carries name and folder
   assert.deepEqual(put.pages, serverRemap(fresh).pages);
   assert.equal(put.name, 'SALES_VIEW');
   assert.equal(put.folderId, 'fld-9');
+});
+
+test('ambiguous create failure recovers the model Sigma created', async () => {
+  const s = new FakeSigma();
+  s.createLost = true;
+  const o = await executeView(s, base({ kind: 'create' }));
+  assert.equal(o.status, 'created');
+  assert.equal(o.dataModelId, 'new-1');
+  assert.equal(s.calls.filter(c => c.op === 'create').length, 1);
+  assert.ok(o.warnings?.some(w => /recovered/.test(w)));
+});
+
+test('ambiguous create failure with no model in the folder is failed', async () => {
+  const s = new FakeSigma();
+  s.failOn = 'create';
+  const o = await executeView(s, base({ kind: 'create' }));
+  assert.equal(o.status, 'failed');
+  assert.equal(o.dataModelId, undefined);
+});
+
+test('create whose column check cannot run deletes the new model', async () => {
+  const s = new FakeSigma();
+  s.failOn = 'columns';
+  const o = await executeView(s, base({ kind: 'create' }));
+  assert.equal(o.status, 'failed');
+  assert.deepEqual(s.calls.filter(c => c.op === 'delete').map(c => c.id), ['new-1']);
+  assert.equal(o.dataModelId, undefined);
+  assert.equal(o.keepInLock, undefined);
+});
+
+test('create whose read-back fails is still recorded as created', async () => {
+  const s = new FakeSigma();
+  const orig = s.getDataModelSpec.bind(s);
+  s.getDataModelSpec = async (id: string) => { if (id === 'new-1') throw new SigmaApiError('Sigma read', 500, '', 'boom'); return orig(id); };
+  const o = await executeView(s, base({ kind: 'create' }));
+  assert.equal(o.status, 'created');
+  assert.equal(o.dataModelId, 'new-1');
+  assert.equal(o.specSha256, '');
+  assert.ok(o.warnings?.length);
+});
+
+test('update whose column check cannot run is rolled back', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { pages: ['good'] });
+  s.failOn = 'columns';
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: lockFor(s, 'dm1') }));
+  assert.equal(o.status, 'failed');
+  assert.deepEqual(s.models.get('dm1')!.pages, ['good']);
+  assert.match(o.error!, /restored/);
+});
+
+test('update whose rollback also fails is kept in the lock for a retry', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { pages: ['good'] });
+  s.errorColumnsFor.add('dm1');
+  let puts = 0;
+  const orig = s.updateDataModel.bind(s);
+  s.updateDataModel = async (id: string, spec: Record<string, unknown>) => { if (++puts === 2) throw new SigmaApiError('Sigma update', 500, '', 'boom'); return orig(id, spec); };
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: lockFor(s, 'dm1') }));
+  assert.equal(o.status, 'failed');
+  assert.equal(o.keepInLock, true);
+  assert.equal(o.dataModelId, 'dm1');
+  assert.match(o.error!, /rolling back failed/);
+});
+
+test('an unknown lock specSha256 is not reported as drift', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { pages: [] });
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: { dataModelId: 'dm1', specSha256: '' } }));
+  assert.equal(o.status, 'updated');
+  assert.equal(o.drift, false);
 });

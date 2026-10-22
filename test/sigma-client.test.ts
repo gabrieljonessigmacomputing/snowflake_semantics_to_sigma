@@ -149,3 +149,31 @@ test('SigmaApiError never contains the client secret', async () => {
     return true;
   });
 });
+
+test('POST is not retried on 5xx or a reset connection, only on 429 and refused connections', async () => {
+  let n = 0;
+  const flaky: Route = (url, init) => (url.pathname === '/v2/dataModels/spec' && init.method === 'POST' ? (++n === 1 ? { status: 504 } : { status: 200, body: { dataModelId: 'dup' } }) : undefined);
+  const h = harness([flaky]);
+  await assert.rejects(h.client.createDataModel({ pages: [] }, 'V', 'f'), (e: unknown) => e instanceof SigmaApiError && e.status === 504);
+  assert.equal(h.calls.filter(c => c.method === 'POST' && c.url.pathname === '/v2/dataModels/spec').length, 1);
+
+  let m = 0;
+  const limited: Route = (url, init) => (url.pathname === '/v2/dataModels/spec' && init.method === 'POST' ? (++m === 1 ? { status: 429 } : { status: 200, body: { dataModelId: 'ok' } }) : undefined);
+  assert.equal(await harness([limited]).client.createDataModel({ pages: [] }, 'V', 'f'), 'ok');
+
+  const mk = (err: Error) => {
+    let k = 0;
+    const fetch = (async (input: string | URL, init: RequestInit = {}) => {
+      const url = new URL(String(input));
+      if (url.pathname === '/v2/auth/token') return new Response(JSON.stringify({ access_token: 't' }), { status: 200 });
+      if (++k === 1) throw err;
+      return new Response(JSON.stringify({ dataModelId: 'after-retry' }), { status: 200 });
+    }) as typeof globalThis.fetch;
+    return { client: new SigmaClient(CREDS, { fetch, sleep: async () => {} }), attempts: () => k };
+  };
+  const reset = mk(Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNRESET' } }));
+  await assert.rejects(reset.client.createDataModel({ pages: [] }, 'V', 'f'), /fetch failed/);
+  assert.equal(reset.attempts(), 1);
+  const refused = mk(Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNREFUSED' } }));
+  assert.equal(await refused.client.createDataModel({ pages: [] }, 'V', 'f'), 'after-retry');
+});

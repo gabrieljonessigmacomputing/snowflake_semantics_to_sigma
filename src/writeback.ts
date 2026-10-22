@@ -52,7 +52,7 @@ export function applyOutcomes(
   for (const o of outcomes) {
     const v = byKey.get(o.key);
     if (!v) continue;
-    if ((o.status === 'created' || o.status === 'updated' || o.status === 'adopted') && o.dataModelId && o.specSha256) {
+    if ((o.status === 'created' || o.status === 'updated' || o.status === 'adopted') && o.dataModelId && o.specSha256 !== undefined) {
       next.views[o.key] = {
         dataModelId: o.dataModelId,
         modelName: o.modelName,
@@ -61,6 +61,20 @@ export function applyOutcomes(
         optionsSha256: ctx.optionsSha256,
         engineCommit: ctx.engineCommit,
         specSha256: o.specSha256,
+        lastDeployedAt: ctx.now,
+        orphaned: false,
+      };
+    } else if (o.status === 'failed' && o.keepInLock && o.dataModelId) {
+      // Still ours: keep the id, and blank the hashes so the next run reprocesses the view.
+      const prev = next.views[o.key];
+      next.views[o.key] = {
+        dataModelId: o.dataModelId,
+        modelName: prev?.modelName ?? o.modelName,
+        sourcePath: v.path,
+        sourceSha256: '',
+        optionsSha256: prev?.optionsSha256 ?? ctx.optionsSha256,
+        engineCommit: prev?.engineCommit ?? ctx.engineCommit,
+        specSha256: '',
         lastDeployedAt: ctx.now,
         orphaned: false,
       };

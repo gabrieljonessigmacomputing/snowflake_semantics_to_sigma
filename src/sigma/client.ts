@@ -42,6 +42,7 @@ interface Deps {
 
 const TOKEN_TTL_MS = 50 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
+const NOT_SENT = new Set(['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN']);
 
 interface Page {
   entries?: unknown;
@@ -77,8 +78,13 @@ export class SigmaClient {
     return text.split(secret).join('***').split(encodeURIComponent(secret)).join('***');
   }
 
-  /** fetch with retry on 429 / 5xx / network errors (1s, 2s, … or Retry-After). */
-  private async send(url: string, init: RequestInit): Promise<Response> {
+  /**
+   * fetch with retry (1s, 2s, … or Retry-After). 429 and connection-refused
+   * failures are always retried (the request was not processed / never sent);
+   * 5xx and other network errors only when `idempotent`, because a POST that
+   * timed out may already have created its model.
+   */
+  private async send(url: string, init: RequestInit, idempotent = true): Promise<Response> {
     for (let attempt = 1; ; attempt++) {
       let res: Response | undefined;
       let netErr: unknown;
@@ -87,7 +93,8 @@ export class SigmaClient {
       } catch (e) {
         netErr = e;
       }
-      const retryable = res === undefined || res.status === 429 || res.status >= 500;
+      const neverSent = res === undefined && NOT_SENT.has(String((netErr as { cause?: { code?: unknown } })?.cause?.code));
+      const retryable = res === undefined ? idempotent || neverSent : res.status === 429 || (idempotent && res.status >= 500);
       if (!retryable || attempt >= MAX_ATTEMPTS) {
         if (res === undefined) throw netErr;
         return res;
@@ -134,7 +141,7 @@ export class SigmaClient {
           ...(body !== undefined && { 'Content-Type': 'application/json' }),
         },
         ...(body !== undefined && { body: JSON.stringify(body) }),
-      });
+      }, method !== 'POST');
     let res = await go(await this.accessToken());
     if (res.status === 401) res = await go(await this.accessToken(true));
     return res;
