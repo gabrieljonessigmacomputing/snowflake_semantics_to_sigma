@@ -3,14 +3,15 @@
  * writes that state back to the repo (push, bot PR, or nothing).
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getExecOutput } from '@actions/exec';
 import { stringify as toYaml } from 'yaml';
 import type { ViewSource } from './discover.js';
 import type { ViewOutcome } from './execute.js';
 import { keyFileName } from './identity.js';
-import type { Lock } from './lock.js';
+import { canonicalSha256, readLock, writeLock, type Lock } from './lock.js';
 
 export const COMMIT_MESSAGE = 'chore(sigma): sync semantic views [skip ci]';
 export const STATE_BRANCH = 'sigma-sync/state';
@@ -158,4 +159,67 @@ export async function writeBack(
 export async function uploadStateArtifact(files: string[], rootDir: string, upload?: ArtifactUploader): Promise<void> {
   const client = upload ?? new (await import('@actions/artifact')).DefaultArtifactClient();
   await client.uploadArtifact(ARTIFACT_NAME, files, rootDir, { retentionDays: 30 });
+}
+
+/** Per key, the entry deployed most recently wins. */
+function mergeLocks(base: Lock, overlay: Lock): { lock: Lock; won: string[] } {
+  const views = { ...base.views };
+  const won: string[] = [];
+  for (const [key, e] of Object.entries(overlay.views)) {
+    const mine = views[key];
+    if (!mine || e.lastDeployedAt > mine.lastDeployedAt) {
+      views[key] = e;
+      won.push(key);
+    }
+  }
+  return { lock: { version: 1, views }, won };
+}
+
+/**
+ * Brings the checkout's state up to date before the lock is read, so a run never
+ * works from a stale lock: in push mode the branch is fast-forwarded to its
+ * remote tip (a quick second push checks out a commit without the first run's
+ * state commit); in pull_request mode the unmerged state branch's lock and specs
+ * are overlaid (main never has them until the state PR is merged).
+ */
+export async function refreshState(
+  mode: 'push' | 'pull_request' | 'none',
+  ctx: WriteBackContext,
+  lockFile: string,
+  specsDir: string,
+): Promise<{ warnings: string[] }> {
+  const warnings: string[] = [];
+  if (mode === 'none') return { warnings };
+  const shallow = (await gitRun(ctx, 'rev-parse', '--is-shallow-repository')).stdout.trim() === 'true';
+
+  if (mode === 'push') {
+    const fetch = await gitRun(ctx, 'fetch', '-q', '--no-tags', ...(shallow ? ['--unshallow'] : []), 'origin', ctx.ref);
+    if (fetch.exitCode !== 0) return { warnings: [`could not fetch ${ctx.ref} to refresh state: ${fetch.stderr.trim()}`] };
+    if ((await gitRun(ctx, 'merge-base', '--is-ancestor', 'HEAD', 'FETCH_HEAD')).exitCode !== 0) {
+      return { warnings: [`${ctx.ref} has diverged from this checkout; using the checked-out lockfile`] };
+    }
+    const ff = await gitRun(ctx, 'merge', '-q', '--ff-only', 'FETCH_HEAD');
+    if (ff.exitCode !== 0) warnings.push(`could not fast-forward to the tip of ${ctx.ref}: ${ff.stderr.trim()}`);
+    return { warnings };
+  }
+
+  // pull_request: history is needed later only for the state branch push, not for a rebase.
+  const fetch = await gitRun(ctx, 'fetch', '-q', '--no-tags', '--depth=1', 'origin', STATE_BRANCH);
+  if (fetch.exitCode !== 0) return { warnings }; // no open state branch yet
+  const shown = await gitRun(ctx, 'show', `FETCH_HEAD:${lockFile}`);
+  if (shown.exitCode !== 0) return { warnings };
+  const tmp = join(mkdtempSync(join(tmpdir(), 'sigma-state-')), 'lock.json');
+  writeFileSync(tmp, shown.stdout);
+  let stateLock: Lock;
+  try {
+    stateLock = readLock(tmp);
+  } catch (e) {
+    return { warnings: [`ignoring the lockfile on ${STATE_BRANCH}: ${e instanceof Error ? e.message : String(e)}`] };
+  }
+  const lockPath = join(ctx.cwd, lockFile);
+  const current = readLock(lockPath);
+  const { lock, won } = mergeLocks(current, stateLock);
+  if (canonicalSha256(lock) !== canonicalSha256(current) || !existsSync(lockPath)) writeLock(lockPath, lock);
+  for (const key of won) await gitRun(ctx, 'checkout', 'FETCH_HEAD', '--', `${specsDir}/${keyFileName(key)}.yml`);
+  return { warnings };
 }

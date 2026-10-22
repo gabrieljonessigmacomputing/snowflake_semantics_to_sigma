@@ -245,3 +245,16 @@ test('a USE preamble is refused with the engine findings', async () => {
   assert.equal(o.status, 'refused');
   assert.ok(o.findings.some(f => f.code === 'MALFORMED_DDL'));
 });
+
+test('state is refreshed before the lock is read, and not on dry runs', async () => {
+  const dir = repo(STD);
+  const order: string[] = [];
+  const s = new FakeSigma();
+  const { d } = deps(dir, s, { refreshState: async () => { order.push(`refresh:${s.calls.length}`); return { warnings: ['refreshed'] }; } });
+  const r = await run(config(), d);
+  assert.deepEqual(order, ['refresh:0']);
+  assert.ok(r.warnings.includes('refreshed'));
+  order.length = 0;
+  await run(config({ dryRun: true }), deps(dir, s, { refreshState: async () => { order.push('refresh'); return { warnings: [] }; } }).d);
+  assert.deepEqual(order, []);
+});

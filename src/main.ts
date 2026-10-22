@@ -6,7 +6,7 @@ import { parseInputs } from './inputs.js';
 import { run } from './run.js';
 import { SigmaClient } from './sigma/client.js';
 import { renderSummary } from './summary.js';
-import { uploadStateArtifact, writeBack, type OctokitLike } from './writeback.js';
+import { refreshState, uploadStateArtifact, writeBack, type OctokitLike } from './writeback.js';
 
 async function main(): Promise<void> {
   const cfg = parseInputs(name => core.getInput(name), { name: github.context.eventName });
@@ -14,13 +14,18 @@ async function main(): Promise<void> {
   const client = cfg.sigma ? new SigmaClient(cfg.sigma) : undefined;
   const octokit = cfg.commitMode === 'pull_request' && cfg.githubToken ? (github.getOctokit(cfg.githubToken).rest as unknown as OctokitLike) : undefined;
 
+  const cwd = process.env.GITHUB_WORKSPACE ?? process.cwd();
+  const ref = (github.context.ref ?? '').replace(/^refs\/heads\//, '');
+  const repo = process.env.GITHUB_REPOSITORY ? github.context.repo : { owner: '', repo: '' };
+  const gitCtx = { cwd, ref, repo, token: cfg.githubToken, gitUserName: cfg.gitUserName, gitUserEmail: cfg.gitUserEmail, octokit };
   const result = await run(cfg, {
-    cwd: process.env.GITHUB_WORKSPACE ?? process.cwd(),
+    cwd,
     client,
     writeBack,
     upload: (files, root) => uploadStateArtifact(files, root),
-    ref: (github.context.ref ?? '').replace(/^refs\/heads\//, ''),
-    repo: process.env.GITHUB_REPOSITORY ? github.context.repo : { owner: '', repo: '' },
+    ref,
+    repo,
+    refreshState: () => refreshState(cfg.commitMode, gitCtx, cfg.lockFile, cfg.specsDir),
     now: () => new Date().toISOString(),
     ...(process.env.RUNNER_TEMP && { tempDir: process.env.RUNNER_TEMP }),
     octokit,

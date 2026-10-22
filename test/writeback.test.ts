@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { applyOutcomes, saveSpecs, writeBack, uploadStateArtifact, COMMIT_MESSAGE } from '../src/writeback.js';
+import { applyOutcomes, saveSpecs, writeBack, uploadStateArtifact, refreshState, COMMIT_MESSAGE } from '../src/writeback.js';
 import type { ViewOutcome } from '../src/execute.js';
 import type { Lock, LockEntry } from '../src/lock.js';
 import type { ViewSource } from '../src/discover.js';
@@ -157,4 +157,88 @@ test('uploadStateArtifact uses the fixed artifact name', async () => {
   const calls: unknown[][] = [];
   await uploadStateArtifact(['/w/sigma/semantic-views.lock.json'], '/w', { uploadArtifact: async (...a: unknown[]) => { calls.push(a); return {}; } });
   assert.deepEqual(calls[0].slice(0, 3), ['sigma-semantic-sync-state', ['/w/sigma/semantic-views.lock.json'], '/w']);
+});
+
+const LOCK = 'sigma/semantic-views.lock.json';
+const lockWith = (views: Record<string, Partial<LockEntry>>) => JSON.stringify({ version: 1, views: Object.fromEntries(Object.entries(views).map(([k, v]) => [k, entry(v)])) }, null, 2) + '\n';
+const pushLock = (r: ReturnType<typeof repos>, content: string, branch = 'main') => {
+  writeFileSync(join(r.seed, LOCK), content);
+  git(r.seed, 'add', '-A');
+  git(r.seed, 'commit', '-qm', `state on ${branch}`);
+  git(r.seed, 'push', '-q', 'origin', `HEAD:${branch}`);
+};
+
+test('refreshState fast-forwards a stale checkout in push mode', async () => {
+  const r = repos();
+  pushLock(r, lockWith({ A: { dataModelId: 'a1' } }));
+  const res = await refreshState('push', ctxFor(r.work), LOCK, 'sigma/models');
+  assert.deepEqual(res.warnings, []);
+  assert.equal(readFileSync(join(r.work, LOCK), 'utf8'), lockWith({ A: { dataModelId: 'a1' } }));
+  assert.equal(git(r.work, 'rev-parse', 'HEAD'), git(r.origin, 'rev-parse', 'main'));
+});
+
+test('refreshState and a racing push work from a shallow checkout', async () => {
+  const r = repos();
+  const shallow = join(r.root, 'shallow');
+  execFileSync('git', ['clone', '-q', '--depth', '1', `file://${r.origin}`, shallow], { stdio: 'ignore' });
+  pushLock(r, lockWith({ A: { dataModelId: 'a1' } }));
+  assert.deepEqual((await refreshState('push', ctxFor(shallow), LOCK, 'sigma/models')).warnings, []);
+  assert.match(readFileSync(join(shallow, LOCK), 'utf8'), /a1/);
+  writeFileSync(join(r.seed, 'other.txt'), 'racing\n');
+  git(r.seed, 'add', '-A');
+  git(r.seed, 'commit', '-qm', 'racing commit');
+  git(r.seed, 'push', '-q', 'origin', 'HEAD:main');
+  writeFileSync(join(shallow, LOCK), lockWith({ A: { dataModelId: 'a1' }, B: { dataModelId: 'b1' } }));
+  const wb = await writeBack('push', [LOCK], ctxFor(shallow));
+  assert.equal(wb.ok, true, wb.detail);
+});
+
+test('pull_request mode overlays the unmerged state branch lock and specs', async () => {
+  const r = repos();
+  git(r.seed, 'checkout', '-q', '-b', 'sigma-sync/state');
+  mkdirSync(join(r.seed, 'sigma/models'), { recursive: true });
+  writeFileSync(join(r.seed, 'sigma/models/A.yml'), 'pages: []\n');
+  pushLock(r, lockWith({ A: { dataModelId: 'a1', lastDeployedAt: '2026-10-22T10:00:00Z' }, B: { dataModelId: 'b-old', lastDeployedAt: '2026-10-01T00:00:00Z' } }), 'sigma-sync/state');
+  writeFileSync(join(r.work, LOCK), lockWith({ B: { dataModelId: 'b-new', lastDeployedAt: '2026-10-20T00:00:00Z' } }));
+  const res = await refreshState('pull_request', ctxFor(r.work), LOCK, 'sigma/models');
+  assert.deepEqual(res.warnings, []);
+  const lock = JSON.parse(readFileSync(join(r.work, LOCK), 'utf8'));
+  assert.equal(lock.views.A.dataModelId, 'a1');
+  assert.equal(lock.views.B.dataModelId, 'b-new', 'the newer entry wins');
+  assert.equal(readFileSync(join(r.work, 'sigma/models/A.yml'), 'utf8'), 'pages: []\n');
+});
+
+test('two runs in pull_request mode keep both runs state', async () => {
+  const r = repos();
+  const octokit = { pulls: { list: async () => ({ data: [] as unknown[] }), create: async () => ({}) } };
+  writeFileSync(join(r.work, LOCK), lockWith({ A: { dataModelId: 'a1', lastDeployedAt: '2026-10-22T10:00:00Z' } }));
+  assert.equal((await writeBack('pull_request', [LOCK], ctxFor(r.work, octokit))).ok, true);
+  const run2 = join(r.root, 'run2');
+  execFileSync('git', ['clone', '-q', '--depth', '1', `file://${r.origin}`, run2], { stdio: 'ignore' });
+  await refreshState('pull_request', ctxFor(run2, octokit), LOCK, 'sigma/models');
+  const lock = JSON.parse(readFileSync(join(run2, LOCK), 'utf8'));
+  lock.views.B = entry({ dataModelId: 'b1', lastDeployedAt: '2026-10-22T11:00:00Z' });
+  writeFileSync(join(run2, LOCK), JSON.stringify(lock, null, 2) + '\n');
+  assert.equal((await writeBack('pull_request', [LOCK], ctxFor(run2, octokit))).ok, true);
+  const state = JSON.parse(git(r.origin, 'show', `sigma-sync/state:${LOCK}`));
+  assert.deepEqual(Object.keys(state.views).sort(), ['A', 'B']);
+});
+
+test('a corrupt state-branch lock is ignored with a warning', async () => {
+  const r = repos();
+  git(r.seed, 'checkout', '-q', '-b', 'sigma-sync/state');
+  pushLock(r, '<<<<<<< HEAD\n', 'sigma-sync/state');
+  const before = readFileSync(join(r.work, LOCK), 'utf8');
+  const res = await refreshState('pull_request', ctxFor(r.work), LOCK, 'sigma/models');
+  assert.equal(res.warnings.length, 1);
+  assert.match(res.warnings[0], /sigma-sync\/state/);
+  assert.equal(readFileSync(join(r.work, LOCK), 'utf8'), before);
+});
+
+test('refreshState in none mode does nothing', async () => {
+  const r = repos();
+  pushLock(r, lockWith({ A: {} }));
+  const before = git(r.work, 'rev-parse', 'HEAD');
+  assert.deepEqual((await refreshState('none', ctxFor(r.work), LOCK, 'sigma/models')).warnings, []);
+  assert.equal(git(r.work, 'rev-parse', 'HEAD'), before);
 });

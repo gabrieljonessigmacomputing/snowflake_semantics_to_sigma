@@ -30,6 +30,8 @@ export interface RunDeps {
   /** Scratch space for pre-update specs and the artifact (default: a fresh dir under the OS temp dir). */
   tempDir?: string;
   octokit?: Parameters<typeof writeBack>[2]['octokit'];
+  /** Brings the checkout's state up to date (writeback.refreshState); called before the lock is read, never on dry runs. */
+  refreshState?: () => Promise<{ warnings: string[] }>;
 }
 
 export interface RunResult {
@@ -62,7 +64,8 @@ export async function run(cfg: Config, deps: RunDeps): Promise<RunResult> {
     return { ...result, exitCode: failed || refused ? 1 : 0 };
   };
 
-  // 1. Lock first: a corrupt lock stops everything before Sigma is touched.
+  // 1. Lock first (after refreshing it): a corrupt lock stops everything before Sigma is touched.
+  if (!cfg.dryRun && deps.refreshState) result.warnings.push(...(await deps.refreshState()).warnings);
   const lockPath = join(cwd, cfg.lockFile);
   let lock: Lock;
   try {
