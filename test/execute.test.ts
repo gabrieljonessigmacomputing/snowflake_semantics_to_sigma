@@ -257,3 +257,17 @@ test('an unknown lock specSha256 is not reported as drift', async () => {
   assert.equal(o.status, 'updated');
   assert.equal(o.drift, false);
 });
+
+test('an update Sigma rejected (4xx) is not rolled back, since nothing was applied', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { pages: ['good'] });
+  s.updateDataModel = async (id: string, spec: Record<string, unknown>) => {
+    s.calls.push({ op: 'update', id, body: spec });
+    throw new SigmaApiError('Sigma data model update', 400, '{}', '1 schema error in data model spec');
+  };
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: lockFor(s, 'dm1') }));
+  assert.equal(o.status, 'failed');
+  assert.equal(s.calls.filter(c => c.op === 'update').length, 1);
+  assert.match(o.error!, /rejected/);
+  assert.equal(o.keepInLock, undefined);
+});

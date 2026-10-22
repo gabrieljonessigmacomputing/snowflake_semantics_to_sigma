@@ -177,3 +177,13 @@ test('POST is not retried on 5xx or a reset connection, only on 429 and refused 
   const refused = mk(Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNREFUSED' } }));
   assert.equal(await refused.client.createDataModel({ pages: [] }, 'V', 'f'), 'after-retry');
 });
+
+test('SigmaApiError message includes nested error summaries', async () => {
+  const body = { message: '1 schema error in data model spec', code: 'invalid_request', errors: [{ summary: "Cannot resolve columns on table 'order_fact': dependency not found: formula reference 'order_fact/not a real column'" }] };
+  const bad: Route = (url, init) => (url.pathname === '/v2/dataModels/spec' && init.method === 'POST' ? { status: 400, body } : undefined);
+  await assert.rejects(harness([bad]).client.createDataModel({ pages: [] }, 'V', 'f'), (e: unknown) => {
+    assert.ok(e instanceof SigmaApiError);
+    assert.match(e.message, /1 schema error in data model spec: Cannot resolve columns on table 'order_fact'.*not a real column/);
+    return true;
+  });
+});

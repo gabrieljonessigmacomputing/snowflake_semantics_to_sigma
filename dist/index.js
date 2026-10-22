@@ -160309,11 +160309,12 @@ var TOKEN_TTL_MS = 50 * 60 * 1e3;
 var MAX_ATTEMPTS = 3;
 var NOT_SENT = /* @__PURE__ */ new Set(["ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN"]);
 function detailOf(body) {
-  if (body && typeof body === "object") {
-    const r = body;
-    for (const k of ["message", "error_description", "error", "detail"]) if (typeof r[k] === "string") return r[k];
-  }
-  return void 0;
+  if (!body || typeof body !== "object") return void 0;
+  const r = body;
+  const summary2 = ["message", "error_description", "error", "detail"].map((k) => r[k]).find((v) => typeof v === "string");
+  const nested = Array.isArray(r.errors) ? r.errors.map((e) => typeof e === "string" ? e : ["summary", "message", "detail"].map((k) => e?.[k]).find((v) => typeof v === "string")).filter((v) => typeof v === "string" && v !== "") : [];
+  const parts = [summary2, nested.join("; ")].filter(Boolean);
+  return parts.length > 0 ? parts.join(": ") : void 0;
 }
 var SigmaClient = class {
   constructor(creds, deps = {}) {
@@ -160559,10 +160560,17 @@ async function update(client, args, out, kind) {
   let failure;
   try {
     await client.updateDataModel(id, body);
-    const bad2 = await errorColumns(client, id);
-    if (bad2.length > 0) failure = { error: `${bad2.length} column(s) did not resolve`, errorColumns: bad2 };
   } catch (e) {
-    failure = { error: `the update or its column check failed (${message(e)})` };
+    if (!ambiguous(e)) return { ...out, error: `Sigma rejected the update, so the live spec is unchanged: ${message(e)}` };
+    failure = { error: `the update failed (${message(e)})` };
+  }
+  if (!failure) {
+    try {
+      const bad2 = await errorColumns(client, id);
+      if (bad2.length > 0) failure = { error: `${bad2.length} column(s) did not resolve`, errorColumns: bad2 };
+    } catch (e) {
+      failure = { error: `the column check could not run (${message(e)})` };
+    }
   }
   if (failure) {
     try {

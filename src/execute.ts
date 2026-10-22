@@ -159,10 +159,18 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
   let failure: { error: string; errorColumns?: ViewOutcome['errorColumns'] } | undefined;
   try {
     await client.updateDataModel(id, body);
-    const bad = await errorColumns(client, id);
-    if (bad.length > 0) failure = { error: `${bad.length} column(s) did not resolve`, errorColumns: bad };
   } catch (e) {
-    failure = { error: `the update or its column check failed (${message(e)})` };
+    // Sigma refused the spec outright (4xx): nothing was applied, so there is nothing to roll back.
+    if (!ambiguous(e)) return { ...out, error: `Sigma rejected the update, so the live spec is unchanged: ${message(e)}` };
+    failure = { error: `the update failed (${message(e)})` };
+  }
+  if (!failure) {
+    try {
+      const bad = await errorColumns(client, id);
+      if (bad.length > 0) failure = { error: `${bad.length} column(s) did not resolve`, errorColumns: bad };
+    } catch (e) {
+      failure = { error: `the column check could not run (${message(e)})` };
+    }
   }
   if (failure) {
     try {
