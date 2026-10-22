@@ -46,7 +46,7 @@ class FakeSigma implements SigmaWriter {
 const view: ViewSource = { key: 'D.S.V', name: { database: 'D', schema: 'S', view: 'V' }, path: 'v.sql', format: 'ddl', index: 0, fileSha256: 'sha' };
 const spec = { schemaVersion: 1, pages: [{ id: 'p', elements: [] }] };
 const dir = () => mkdtempSync(join(tmpdir(), 'ssv-exec-'));
-const base = (decision: Decision, over: Record<string, unknown> = {}) => ({ view, decision, spec, modelName: 'V', folderId: 'fld', findings: [], dryRun: false, preUpdateDir: dir(), ...over });
+const base = (decision: Decision, over: Record<string, unknown> = {}) => ({ view, decision, spec, modelName: 'V', folderId: 'fld', findings: [], dryRun: false, preUpdateDir: dir(), sleep: async () => {}, ...over });
 const lockFor = (s: FakeSigma, id: string): LockEntry => ({ dataModelId: id, specSha256: specHash(s.models.get(id)!), specHashVersion: 2 } as LockEntry);
 
 test('dry run never calls write methods', async () => {
@@ -302,4 +302,30 @@ test('a lock hash written by an older version is not reported as drift', async (
   const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: legacy }));
   assert.equal(o.status, 'updated');
   assert.equal(o.drift, false);
+});
+
+test('ambiguous create recovery waits for the folder listing to catch up', async () => {
+  const s = new FakeSigma();
+  s.createLost = true;
+  let listings = 0;
+  const realList = s.listDataModelsInFolder.bind(s);
+  // Sigma's listing lags a new model by ~5-6 s: hide it from the first two listings.
+  s.listDataModelsInFolder = async (folderId: string) => (++listings <= 2 ? [] : realList(folderId));
+  const sleeps: number[] = [];
+  const o = await executeView(s, base({ kind: 'create' }, { sleep: async (ms: number) => { sleeps.push(ms); } }));
+  assert.equal(o.status, 'created');
+  assert.equal(o.dataModelId, 'new-1');
+  assert.equal(listings, 3);
+  assert.deepEqual(sleeps, [4000, 4000]);
+});
+
+test('ambiguous create recovery gives up after about 20 seconds', async () => {
+  const s = new FakeSigma();
+  s.createLost = true;
+  s.listDataModelsInFolder = async () => [];
+  const sleeps: number[] = [];
+  const o = await executeView(s, base({ kind: 'create' }, { sleep: async (ms: number) => { sleeps.push(ms); } }));
+  assert.equal(o.status, 'failed');
+  assert.equal(sleeps.reduce((a, b) => a + b, 0), 20000);
+  assert.match(o.error!, /look in the target folder/);
 });

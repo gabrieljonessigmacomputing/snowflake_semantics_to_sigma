@@ -45,7 +45,12 @@ export interface ExecuteArgs {
   dryRun: boolean;
   /** Where pre-update specs are saved (drift / adopt) for the run artifact. */
   preUpdateDir: string;
+  sleep?: (ms: number) => Promise<void>;
 }
+
+/** Sigma's folder listing shows a new model ~5-6 s after it is created (measured 2026-10). */
+const LISTING_POLL_MS = 4000;
+const LISTING_POLLS = 5;
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
@@ -94,13 +99,22 @@ async function create(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome):
   } catch (e) {
     if (!ambiguous(e)) return { ...out, error: message(e) };
     // The POST may have gone through. The decision saw no model of this name, so one now is ours.
-    let mine: { id: string }[];
+    // The listing lags new models by a few seconds, so keep looking for a while.
+    const sleep = args.sleep ?? (ms => new Promise<void>(r => setTimeout(r, ms)));
+    let mine: { id: string }[] = [];
     try {
-      mine = (await client.listDataModelsInFolder(folderId)).filter(m => m.name === modelName);
+      for (let poll = 0; ; poll++) {
+        mine = (await client.listDataModelsInFolder(folderId)).filter(m => m.name === modelName);
+        if (mine.length > 0 || poll >= LISTING_POLLS) break;
+        await sleep(LISTING_POLL_MS);
+      }
     } catch {
       return { ...out, error: `${message(e)}; could not check whether Sigma created "${modelName}" anyway — look in the target folder before the next run` };
     }
-    if (mine.length !== 1) return { ...out, error: mine.length === 0 ? message(e) : `${message(e)}; ${mine.length} data models named "${modelName}" now exist (${mine.map(m => m.id).join(', ')})` };
+    if (mine.length === 0) {
+      return { ...out, error: `${message(e)}; Sigma may still have created "${modelName}" (it did not appear in the folder within ${(LISTING_POLLS * LISTING_POLL_MS) / 1000} s) — look in the target folder before the next run` };
+    }
+    if (mine.length > 1) return { ...out, error: `${message(e)}; ${mine.length} data models named "${modelName}" now exist (${mine.map(m => m.id).join(', ')})` };
     id = mine[0].id;
     warnings.push(`${args.view.key}: creating "${modelName}" returned an error (${message(e)}) but Sigma had created it; recovered data model ${id}`);
   }
