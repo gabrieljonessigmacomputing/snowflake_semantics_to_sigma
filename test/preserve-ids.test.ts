@@ -78,3 +78,51 @@ test('a brand-new element and its columns keep placeholders; nothing collides', 
   const nation = el(out, (e: any) => e.id === 'nation');
   assert.deepEqual(nation.order, ['nation__n_name']);
 });
+
+// Live Sigma (2026-10) keeps the engine's ids on create but rewrites display names inside formulas
+// (`[DATE_DIM/Day Of Week]` comes back as `[DATE_DIM/Day of Week]`).
+const liveShaped = (): { schemaVersion: number; pages: { id: string; name: string; elements: any[] }[] } => ({
+  schemaVersion: 1,
+  pages: [{ id: 'page1', name: 'Page 1', elements: [
+    { id: 'date_dim', kind: 'table', name: 'DATE_DIM', source: { kind: 'warehouse-table', connectionId: 'c', path: ['CSA', 'TJ', 'DATE_DIM'] },
+      columns: [{ id: 'date_dim__day_of_week', formula: '[DATE_DIM/Day of Week]' }, { id: 'date_dim__year', formula: '[DATE_DIM/Year]' }],
+      order: ['date_dim__day_of_week', 'date_dim__year'] },
+    { id: 'order_fact', kind: 'table', name: 'ORDER_FACT', source: { kind: 'warehouse-table', connectionId: 'c', path: ['CSA', 'TJ', 'ORDER_FACT'] },
+      columns: [{ id: 'order_fact__days_to_ship', formula: '[ORDER_FACT/Days to Ship]' }],
+      metrics: [{ id: 'order_fact__m__avg_days_to_ship', formula: 'Avg([Days to Ship])', name: 'Avg Days To Ship' }] },
+  ] }],
+});
+const engineShaped = () => ({
+  schemaVersion: 1,
+  pages: [{ id: 'page1', elements: [
+    { id: 'date_dim', kind: 'table', source: { kind: 'warehouse-table', connectionId: 'c', path: ['CSA', 'TJ', 'DATE_DIM'] },
+      columns: [{ id: 'date_dim__day_of_week', formula: '[DATE_DIM/Day Of Week]' }, { id: 'date_dim__year', formula: '[DATE_DIM/Year]' }],
+      order: ['date_dim__day_of_week', 'date_dim__year'] },
+    { id: 'order_fact', kind: 'table', source: { kind: 'warehouse-table', connectionId: 'c', path: ['CSA', 'TJ', 'ORDER_FACT'] },
+      columns: [{ id: 'order_fact__days_to_ship', formula: '[ORDER_FACT/Days To Ship]' }],
+      metrics: [{ id: 'order_fact__m__average_days_to_ship', formula: 'Avg([Days To Ship])', name: 'Average Days To Ship' }] },
+  ] }],
+});
+
+test('ids Sigma kept verbatim stay put even when Sigma rewrote the formula casing', () => {
+  const { spec: out, fresh } = preserveIds(engineShaped(), liveShaped());
+  assert.deepEqual(collectIds(out).filter(id => id.endsWith('__new')), []);
+  assert.equal(el(out, (e: any) => e.id === 'date_dim').columns[0].id, 'date_dim__day_of_week');
+  assert.deepEqual(el(out, (e: any) => e.id === 'date_dim').order, ['date_dim__day_of_week', 'date_dim__year']);
+  assert.equal(fresh, 0);
+});
+
+test('a renamed metric keeps its live id when the formula differs only in casing', () => {
+  const { spec: out } = preserveIds(engineShaped(), liveShaped());
+  const m = el(out, (e: any) => e.id === 'order_fact').metrics[0];
+  assert.equal(m.id, 'order_fact__m__avg_days_to_ship');
+  assert.equal(m.name, 'Average Days To Ship');
+});
+
+test('a second update after ids were re-keyed keeps the current live ids', () => {
+  const live = liveShaped();
+  live.pages[0].elements[0].columns[0].id = 'date_dim__day_of_week__new';
+  live.pages[0].elements[0].order![0] = 'date_dim__day_of_week__new';
+  const { spec: out } = preserveIds(engineShaped(), live);
+  assert.equal(el(out, (e: any) => e.id === 'date_dim').columns[0].id, 'date_dim__day_of_week__new');
+});

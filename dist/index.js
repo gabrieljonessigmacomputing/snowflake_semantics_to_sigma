@@ -160177,7 +160177,8 @@ import { join } from "node:path";
 
 // src/preserve-ids.ts
 var ID_KEY = /^(id|.*Id|.*Ids|order|uniqueKeys)$/;
-var norm = (s) => typeof s === "string" && s.trim() !== "" ? s.replace(/\s+/g, " ").trim() : void 0;
+var norm = (s) => typeof s === "string" && s.trim() !== "" ? s.replace(/\s+/g, " ").trim().toLowerCase() : void 0;
+var sameId = (x) => typeof x.id === "string" ? `id:${x.id}` : void 0;
 function pairBy(a, b, keys) {
   const pairs2 = [];
   const usedA = /* @__PURE__ */ new Set();
@@ -160258,12 +160259,13 @@ function preserveIds(next, live) {
   const link = (a, b) => {
     if (typeof a.id === "string" && typeof b.id === "string") map2.set(a.id, b.id);
   };
-  for (const [a, b] of pairBy(next.pages ?? [], live.pages ?? [], [(x) => norm(x.name), (_x2, i) => String(i)])) link(a, b);
+  for (const [a, b] of pairBy(next.pages ?? [], live.pages ?? [], [sameId, (x) => norm(x.name), (_x2, i) => String(i)])) link(a, b);
   const nextSig = signatures(next);
   const liveSig = signatures(live);
   const nextById = new Map(elementsOf(next).map((e) => [e.id, e]));
   const liveById = new Map(elementsOf(live).map((e) => [e.id, e]));
   const elementPairs = pairBy(elementsOf(next), elementsOf(live), [
+    sameId,
     (x) => norm(x.name) ? `${nextSig.get(x) ?? liveSig.get(x)}|${norm(x.name)}` : void 0,
     (x) => nextSig.get(x) ?? liveSig.get(x)
   ]);
@@ -160276,7 +160278,7 @@ function preserveIds(next, live) {
         const t = nextById.get(r.targetElementId) ?? liveById.get(r.targetElementId);
         return t ? nextSig.get(t) ?? liveSig.get(t) : void 0;
       };
-      for (const [x, y] of pairBy(items, liveItems, childKeys(field, targetSig))) link(x, y);
+      for (const [x, y] of pairBy(items, liveItems, [sameId, ...childKeys(field, targetSig)])) link(x, y);
     }
   }
   const liveIds = new Set(allIds(live));

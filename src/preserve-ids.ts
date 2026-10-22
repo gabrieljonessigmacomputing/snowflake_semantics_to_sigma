@@ -8,13 +8,19 @@
  * are paired with their live counterparts by natural key, and every ID and ID
  * reference in the new spec is rewritten to the live one. Objects with no live
  * counterpart keep their placeholder, which Sigma remaps as new.
+ *
+ * Observed live (2026-10): Sigma keeps the engine's ids on create, so an
+ * identical id is the first and strongest match; it also rewrites display-name
+ * casing inside formulas (`Day Of Week` → `Day of Week`), so names and formulas
+ * are compared case-insensitively.
  */
 
 type Obj = Record<string, any>;
 type KeyFn<T> = (x: T, i: number) => string | undefined;
 
 const ID_KEY = /^(id|.*Id|.*Ids|order|uniqueKeys)$/;
-const norm = (s: unknown) => (typeof s === 'string' && s.trim() !== '' ? s.replace(/\s+/g, ' ').trim() : undefined);
+const norm = (s: unknown) => (typeof s === 'string' && s.trim() !== '' ? s.replace(/\s+/g, ' ').trim().toLowerCase() : undefined);
+const sameId: KeyFn<Obj> = x => (typeof x.id === 'string' ? `id:${x.id}` : undefined);
 
 /** Pairs items of `a` with items of `b`: each key function in turn, equal keys matched in occurrence order. */
 function pairBy<T>(a: T[], b: T[], keys: KeyFn<T>[]): [T, T][] {
@@ -105,13 +111,14 @@ export function preserveIds(next: Obj, live: Obj): { spec: Obj; mapped: number; 
     if (typeof a.id === 'string' && typeof b.id === 'string') map.set(a.id, b.id);
   };
 
-  for (const [a, b] of pairBy<Obj>(next.pages ?? [], live.pages ?? [], [x => norm(x.name), (_x, i) => String(i)])) link(a, b);
+  for (const [a, b] of pairBy<Obj>(next.pages ?? [], live.pages ?? [], [sameId, x => norm(x.name), (_x, i) => String(i)])) link(a, b);
 
   const nextSig = signatures(next);
   const liveSig = signatures(live);
   const nextById = new Map(elementsOf(next).map(e => [e.id, e]));
   const liveById = new Map(elementsOf(live).map(e => [e.id, e]));
   const elementPairs = pairBy<Obj>(elementsOf(next), elementsOf(live), [
+    sameId,
     x => (norm(x.name) ? `${(nextSig.get(x) ?? liveSig.get(x))}|${norm(x.name)}` : undefined),
     x => nextSig.get(x) ?? liveSig.get(x),
   ]);
@@ -124,7 +131,7 @@ export function preserveIds(next: Obj, live: Obj): { spec: Obj; mapped: number; 
         const t = nextById.get(r.targetElementId) ?? liveById.get(r.targetElementId);
         return t ? (nextSig.get(t) ?? liveSig.get(t)) : undefined;
       };
-      for (const [x, y] of pairBy<Obj>(items, liveItems, childKeys(field, targetSig))) link(x, y);
+      for (const [x, y] of pairBy<Obj>(items, liveItems, [sameId, ...childKeys(field, targetSig)])) link(x, y);
     }
   }
 
