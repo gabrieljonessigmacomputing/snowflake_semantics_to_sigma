@@ -160552,7 +160552,7 @@ async function update(client, args, out, kind) {
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
   const known = args.lockEntry?.specSha256;
-  const drift = kind === "update" && !!known && specHash(pre) !== known;
+  const drift = kind === "update" && !!known && specHash(pre) !== known && canonicalSha256(pre) !== known;
   out.drift = drift;
   if (drift || kind === "adopt") savePre(args.preUpdateDir, args.view.key, pre);
   const body = {

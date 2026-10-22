@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { executeView, type SigmaWriter } from '../src/execute.js';
 import { SigmaApiError, type DataModelColumn } from '../src/sigma/client.js';
-import { specHash, type LockEntry } from '../src/lock.js';
+import { canonicalSha256, specHash, type LockEntry } from '../src/lock.js';
 import type { Decision } from '../src/decide.js';
 import type { ViewSource } from '../src/discover.js';
 
@@ -280,4 +280,14 @@ test('metadata-only changes in Sigma are not drift', async () => {
   const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry }));
   assert.equal(o.status, 'updated');
   assert.equal(o.drift, false);
+});
+
+test('legacy full-spec lock hashes are not reported as drift', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { schemaVersion: 1, pages: ['same'], documentVersion: 1, updatedAt: 't1' });
+  const lockEntry = { dataModelId: 'dm1', specSha256: canonicalSha256(s.models.get('dm1')) };
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry }));
+  assert.equal(o.status, 'updated');
+  assert.equal(o.drift, false);
+  assert.equal(o.specSha256, specHash(s.models.get('dm1')!));
 });

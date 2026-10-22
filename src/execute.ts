@@ -9,7 +9,7 @@ import type { EmbedFinding } from './convert.js';
 import type { Decision } from './decide.js';
 import type { ViewSource } from './discover.js';
 import { keyFileName } from './identity.js';
-import { specHash, type LockEntry } from './lock.js';
+import { canonicalSha256, specHash, type LockEntry } from './lock.js';
 import { preserveIds } from './preserve-ids.js';
 import { SigmaApiError, type SigmaClient } from './sigma/client.js';
 
@@ -146,7 +146,7 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
   const known = args.lockEntry?.specSha256;
-  const drift = kind === 'update' && !!known && specHash(pre) !== known;
+  const drift = kind === 'update' && !!known && specHash(pre) !== known && canonicalSha256(pre) !== known;
   out.drift = drift;
   if (drift || kind === 'adopt') savePre(args.preUpdateDir, args.view.key, pre);
 
