@@ -54,9 +54,12 @@ jobs:
           commit_mode: none
       - name: Lose the lockfile
         if: env.HAVE_SECRETS == 'true'
+        # Sigma's folder listing shows a new data model ~5-6 s after it is created; the
+        # adopt run finds existing models through that listing, so give it time to catch up.
         run: |
           cp sigma/semantic-views.lock.json "$RUNNER_TEMP/first.lock.json"
           rm sigma/semantic-views.lock.json
+          sleep 20
       - name: Third sync (adopts the existing model; uploads the state artifact)
         id: third
         if: env.HAVE_SECRETS == 'true'

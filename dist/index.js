@@ -160471,6 +160471,8 @@ var SigmaClient = class {
 };
 
 // src/execute.ts
+var LISTING_POLL_MS = 4e3;
+var LISTING_POLLS = 5;
 var message = (e) => e instanceof Error ? e.message : String(e);
 async function errorColumns(client, id) {
   const cols = await client.listDataModelColumns(id);
@@ -160506,13 +160508,21 @@ async function create2(client, args, out) {
     id = await client.createDataModel(spec, modelName, folderId);
   } catch (e) {
     if (!ambiguous(e)) return { ...out, error: message(e) };
-    let mine;
+    const sleep = args.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+    let mine = [];
     try {
-      mine = (await client.listDataModelsInFolder(folderId)).filter((m) => m.name === modelName);
+      for (let poll = 0; ; poll++) {
+        mine = (await client.listDataModelsInFolder(folderId)).filter((m) => m.name === modelName);
+        if (mine.length > 0 || poll >= LISTING_POLLS) break;
+        await sleep(LISTING_POLL_MS);
+      }
     } catch {
       return { ...out, error: `${message(e)}; could not check whether Sigma created "${modelName}" anyway \u2014 look in the target folder before the next run` };
     }
-    if (mine.length !== 1) return { ...out, error: mine.length === 0 ? message(e) : `${message(e)}; ${mine.length} data models named "${modelName}" now exist (${mine.map((m) => m.id).join(", ")})` };
+    if (mine.length === 0) {
+      return { ...out, error: `${message(e)}; Sigma may still have created "${modelName}" (it did not appear in the folder within ${LISTING_POLLS * LISTING_POLL_MS / 1e3} s) \u2014 look in the target folder before the next run` };
+    }
+    if (mine.length > 1) return { ...out, error: `${message(e)}; ${mine.length} data models named "${modelName}" now exist (${mine.map((m) => m.id).join(", ")})` };
     id = mine[0].id;
     warnings.push(`${args.view.key}: creating "${modelName}" returned an error (${message(e)}) but Sigma had created it; recovered data model ${id}`);
   }

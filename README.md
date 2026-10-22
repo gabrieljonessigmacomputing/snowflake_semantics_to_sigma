@@ -113,6 +113,10 @@ Each is a JSON array of view keys.
   not in the lockfile, is **not** overwritten. The view is refused unless
   `adopt_existing: true`, which is meant for recovering a lost lockfile. Two or
   more same-named models are always refused.
+  - Sigma's folder listing shows a new model only about 5–6 seconds after it is created.
+  - A run that has lost its lockfile and starts within those seconds of the
+    model's creation can't see it, and creates a second one.
+  - Normal syncs are unaffected, because they track models through the lockfile.
 - **Drift.** Git is the source of truth for models in the lockfile. If someone
   edited one in Sigma, the next update overwrites it, flags the drift as a
   warning, and saves the previous spec in the run's `sigma-semantic-sync-state`
