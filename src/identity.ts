@@ -107,6 +107,19 @@ export function parseDdlViewNames(sql: string): QualifiedName[] {
   return names;
 }
 
+/** The view name when `yaml` is a Snowflake semantic view document (a mapping with a top-level `name` and a `tables` list). */
+export function semanticViewYamlName(yaml: string): string | undefined {
+  try {
+    const doc = parseYaml(normalizeSource(yaml)) as unknown;
+    if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return undefined;
+    const d = doc as Record<string, unknown>;
+    if (!Array.isArray(d.tables)) return undefined;
+    return typeof d.name === 'string' && d.name.trim() !== '' ? d.name.trim() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** The top-level `name:` of a semantic view YAML document. */
 export function parseYamlViewName(yaml: string): string | undefined {
   try {

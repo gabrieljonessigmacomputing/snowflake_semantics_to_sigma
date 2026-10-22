@@ -211,3 +211,37 @@ test('connection and folder names are resolved online', async () => {
   assert.equal(r.exitCode, 0);
   assert.ok(JSON.stringify((s.calls.find(c => c.op === 'create')!.body as any).spec).includes('conn-resolved'));
 });
+
+test('a file with discovery errors does not orphan its views', async () => {
+  const dir = repo(STD);
+  const s = new FakeSigma();
+  await run(config(), deps(dir, s).d);
+  copyFileSync(join(dir, 'views/sales.sql'), join(dir, 'views/sales_copy.sql'));
+  const r = await run(config(), deps(dir, s).d);
+  assert.ok(r.errors.some(e => e.path === 'views/sales.sql'));
+  assert.deepEqual(r.orphans, []);
+  assert.equal(lockOf(dir).views[SALES].orphaned, false);
+  assert.equal(r.exitCode, 1);
+});
+
+test('a tracked file that stops parsing is an error, not an orphan', async () => {
+  const dir = repo(STD);
+  const s = new FakeSigma();
+  await run(config(), deps(dir, s).d);
+  writeFileSync(join(dir, 'views/tpch.yaml'), 'name: [broken\n');
+  const r = await run(config(), deps(dir, s).d);
+  assert.ok(r.errors.some(e => e.path === 'views/tpch.yaml' && /no longer recognized/.test(e.message)), JSON.stringify(r.errors));
+  assert.deepEqual(r.orphans, []);
+  assert.equal(lockOf(dir).views[TPCH].orphaned, false);
+  assert.equal(r.exitCode, 1);
+});
+
+test('a USE preamble is refused with the engine findings', async () => {
+  const dir = repo({});
+  mkdirSync(join(dir, 'views'));
+  writeFileSync(join(dir, 'views/sales.sql'), 'USE SCHEMA ANALYTICS.MODELS;\n' + readFileSync(join(ROOT, 'test/fixtures/star_schema_ddl.sql'), 'utf8'));
+  const r = await run(config(), deps(dir, new FakeSigma()).d);
+  const o = r.outcomes.find(x => x.key === SALES)!;
+  assert.equal(o.status, 'refused');
+  assert.ok(o.findings.some(f => f.code === 'MALFORMED_DDL'));
+});

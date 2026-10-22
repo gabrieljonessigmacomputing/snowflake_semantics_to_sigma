@@ -81,6 +81,14 @@ export async function run(cfg: Config, deps: RunDeps): Promise<RunResult> {
   );
   result.skipped = discovery.skipped;
   result.errors.push(...discovery.errors);
+  // A file that defined a tracked view but no longer reads as one is an error, never an orphan.
+  const skipped = new Set(discovery.skipped);
+  for (const [key, e] of Object.entries(lock.views)) {
+    if (!e.orphaned && skipped.has(e.sourcePath)) {
+      result.errors.push({ path: e.sourcePath, message: `defined semantic view ${key} (Sigma data model ${e.dataModelId}) but is no longer recognized as a semantic view; fix the file or delete it` });
+    }
+  }
+  const unseenPaths = new Set(result.errors.map(e => e.path));
   const colliding = new Set(findNameCollisions(discovery.views, cfg.modelNameTemplate).flat());
   for (const v of discovery.views.filter(v => colliding.has(v.key))) {
     const modelName = renderModelName(cfg.modelNameTemplate, v.name);
@@ -122,7 +130,8 @@ export async function run(cfg: Config, deps: RunDeps): Promise<RunResult> {
     });
     for (const v of selected.filter(s => s.path === path)) {
       const r = conv.results[v.index];
-      if (r && r.viewName.toUpperCase() === v.name.view.toUpperCase()) conversions.set(v.key, r);
+      // A statement the engine could not parse comes back unnamed (or "statement-N"); keep it so its findings are reported.
+      if (r && (r.viewName.toUpperCase() === v.name.view.toUpperCase() || !r.ok)) conversions.set(v.key, r);
     }
   }
 
@@ -164,7 +173,8 @@ export async function run(cfg: Config, deps: RunDeps): Promise<RunResult> {
     );
   }
 
-  const orphanKeys = findOrphans(discovery.views, lock);
+  // Views whose file errored this run were not seen, not removed: keep them out of the orphan list.
+  const orphanKeys = findOrphans(discovery.views, lock).filter(k => !unseenPaths.has(lock.views[k].sourcePath));
   result.orphans = orphanKeys.map(key => ({ key, dataModelId: lock.views[key].dataModelId }));
   if (cfg.dryRun) return finish();
 

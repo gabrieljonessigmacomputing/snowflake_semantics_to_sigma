@@ -63,3 +63,33 @@ test('listCandidateFiles honors default glob and excludes', async () => {
   const files = await listCandidateFiles('**/*.{yml,yaml,sql}', dir, ['sigma/semantic-views.lock.json', 'sigma/models']);
   assert.deepEqual(files, ['ddl/c.sql', 'views/a.yaml', 'views/b.yml']);
 });
+
+test('DDL with a header comment, block comment or USE preamble is discovered', () => {
+  const ddl = fx('star_schema_ddl.sql').content;
+  for (const content of ['-- Sales view (c) Acme\n' + ddl, '/* header\n * more */\n' + ddl, 'USE SCHEMA ANALYTICS.MODELS;\n' + ddl]) {
+    const r = discoverViews([{ path: 'v.sql', content }], {});
+    assert.deepEqual(r.views.map(v => v.key), ['ANALYTICS.MODELS.SALES_VIEW'], content.slice(0, 30));
+    assert.deepEqual(r.skipped, []);
+  }
+});
+
+test('non-view YAML is skipped: workflow file, dbt_project.yml, k8s manifest', () => {
+  const r = discoverViews([
+    { path: '.github/workflows/sync.yml', content: 'name: Sync semantic views\non:\n  push:\n    branches: [main]\njobs:\n  sync:\n    runs-on: ubuntu-latest\n' },
+    { path: 'dbt_project.yml', content: "name: 'jaffle'\nversion: '1.0.0'\nprofile: 'jaffle'\n" },
+    { path: 'k8s/deploy.yaml', content: 'apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: web\n' },
+    { path: 'compose.yml', content: 'services:\n  db:\n    image: postgres\n    container_name: db\n' },
+  ], {});
+  assert.deepEqual(r.views, []);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.skipped.length, 4);
+});
+
+test('listCandidateFiles excludes .github by default', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ssv-glob-'));
+  for (const p of ['.github/workflows/sync.yml', 'views/a.yaml']) {
+    mkdirSync(dirname(join(dir, p)), { recursive: true });
+    writeFileSync(join(dir, p), 'x');
+  }
+  assert.deepEqual(await listCandidateFiles('**/*.{yml,yaml,sql}', dir, []), ['views/a.yaml']);
+});

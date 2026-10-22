@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import { relative, sep } from 'node:path';
 import * as glob from '@actions/glob';
 import { detectFormat } from './convert.js';
-import { normalizeSource, parseDdlViewNames, parseYamlViewName, viewKey, type QualifiedName } from './identity.js';
+import { normalizeSource, parseDdlViewNames, semanticViewYamlName, viewKey, type QualifiedName } from './identity.js';
 
 export interface ViewSource {
   key: string;
@@ -47,31 +47,28 @@ export function discoverViews(
 
   for (const file of files) {
     const text = normalizeSource(file.content);
-    const format = detectFormat(text);
-    if (format === undefined) {
-      skipped.push(file.path);
-      continue;
-    }
     const fileSha256 = sha256(file.content);
-    if (format === 'snowflake-semantic-view') {
-      const names = parseDdlViewNames(text);
-      if (names.length === 0) {
-        errors.push({ path: file.path, message: 'looks like semantic view DDL but no CREATE SEMANTIC VIEW name could be read' });
-        continue;
-      }
+    // DDL: any CREATE SEMANTIC VIEW outside comments/strings (the engine's own
+    // detectFormat wants CREATE at the very start, which header comments break).
+    const names = parseDdlViewNames(text);
+    if (names.length > 0) {
       names.forEach((n, index) => {
         const name = withDefaults(n, defaults);
         found.push({ key: viewKey(name), name, path: file.path, format: 'ddl', index, fileSha256 });
       });
-    } else {
-      const view = parseYamlViewName(text);
-      if (view === undefined) {
-        errors.push({ path: file.path, message: 'semantic view YAML has no top-level name' });
-        continue;
-      }
-      const name = withDefaults({ view }, defaults);
-      found.push({ key: viewKey(name), name, path: file.path, format: 'yaml', index: 0, fileSha256 });
+      continue;
     }
+    const yamlName = /\.ya?ml$/i.test(file.path) || detectFormat(text) === 'snowflake-semantic-view-yaml' ? semanticViewYamlName(text) : undefined;
+    if (yamlName !== undefined) {
+      const name = withDefaults({ view: yamlName }, defaults);
+      found.push({ key: viewKey(name), name, path: file.path, format: 'yaml', index: 0, fileSha256 });
+      continue;
+    }
+    if (detectFormat(text) === 'snowflake-semantic-view') {
+      errors.push({ path: file.path, message: 'looks like semantic view DDL but no CREATE SEMANTIC VIEW name could be read' });
+      continue;
+    }
+    skipped.push(file.path);
   }
 
   const byKey = new Map<string, ViewSource[]>();
@@ -98,7 +95,7 @@ export async function listCandidateFiles(patterns: string, root: string, exclude
     .filter(Boolean)
     .flatMap(expandBraces)
     .map(l => (l.startsWith('!') ? `!${root}/${l.slice(1)}` : `${root}/${l}`));
-  const excludes = ['.git', 'node_modules', ...exclude].flatMap(e => [`!${root}/${e}`, `!${root}/${e}/**`, `!${root}/**/${e}/**`]);
+  const excludes = ['.git', '.github', 'node_modules', ...exclude].flatMap(e => [`!${root}/${e}`, `!${root}/${e}/**`, `!${root}/**/${e}/**`]);
   const globber = await glob.create([...lines, ...excludes].join('\n'), { followSymbolicLinks: false, matchDirectories: false });
   const files = await globber.glob();
   return [...new Set(files.map(f => relative(root, f).split(sep).join('/')))].sort();
