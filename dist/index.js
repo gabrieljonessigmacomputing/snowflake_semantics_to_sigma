@@ -146564,6 +146564,9 @@ function writeLock(path, lock) {
 function canonicalSha256(value) {
   return createHash("sha256").update(JSON.stringify(sortKeys(value))).digest("hex");
 }
+function specHash(spec) {
+  return canonicalSha256({ schemaVersion: spec.schemaVersion ?? null, pages: spec.pages ?? [] });
+}
 function selectViews(views, lock, ctx) {
   const selected = [];
   const unchanged = [];
@@ -160532,7 +160535,7 @@ async function create2(client, args, out) {
   }
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, warnings, status: "created", dataModelId: id, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, warnings, status: "created", dataModelId: id, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
   }
   warnings.push(`${args.view.key}: data model ${id} was created and verified but could not be read back; drift will not be checked on its next update`);
@@ -160549,7 +160552,7 @@ async function update(client, args, out, kind) {
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
   const known = args.lockEntry?.specSha256;
-  const drift = kind === "update" && !!known && canonicalSha256(pre) !== known;
+  const drift = kind === "update" && !!known && specHash(pre) !== known;
   out.drift = drift;
   if (drift || kind === "adopt") savePre(args.preUpdateDir, args.view.key, pre);
   const body = {
@@ -160583,7 +160586,7 @@ async function update(client, args, out, kind) {
   const status = kind === "adopt" ? "adopted" : "updated";
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
   }
   return { ...out, status, specSha256: "", warnings: [`${args.view.key}: data model ${id} was updated and verified but could not be read back; drift will not be checked on its next update`] };
@@ -160961,8 +160964,8 @@ function renderSummary(r) {
   }
   const drifted = r.outcomes.filter((o) => o.drift);
   if (drifted.length > 0) {
-    out.push("", "### Drift", "", "These data models were edited in Sigma since the last sync and have been overwritten from git. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).", "");
-    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId})`);
+    out.push("", "### Drift", "", "These data models were edited in Sigma since the last sync. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).", "");
+    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId}): ${o.status === "updated" || o.status === "adopted" ? "overwritten from git" : "not changed by this run"}`);
   }
   if (r.orphans.length > 0) {
     out.push("", "### Orphaned", "", "These views are no longer defined in the repo. Their Sigma data models were **never deleted**; delete them in Sigma if they are no longer needed.", "");
@@ -160990,6 +160993,11 @@ function renderSummary(r) {
   }
   if (r.skipped.length > 0) out.push("", `<details><summary>${r.skipped.length} file(s) skipped (not semantic views)</summary>`, "", ...r.skipped.map((s) => `- ${s}`), "", "</details>");
   return out.join("\n") + "\n";
+}
+function driftWarnings(r) {
+  return r.outcomes.filter((o) => o.drift).map(
+    (o) => `${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; ` + (o.status === "updated" || o.status === "adopted" ? "overwritten from git (previous spec saved in the run artifact)" : "it was not changed by this run (previous spec saved in the run artifact)")
+  );
 }
 
 // src/main.ts
@@ -161019,7 +161027,7 @@ async function main() {
   core.setOutput("updated", keys("updated", "adopted"));
   core.setOutput("refused", keys("refused"));
   core.setOutput("orphaned", JSON.stringify(result.orphans.map((o) => o.key)));
-  for (const o of result.outcomes.filter((o2) => o2.drift)) core.warning(`${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; overwritten from git (previous spec saved in the run artifact)`);
+  for (const w of driftWarnings(result)) core.warning(w);
   for (const w of result.warnings) core.warning(w);
   await core.summary.addRaw(renderSummary(result)).write();
   if (result.exitCode === 1) {

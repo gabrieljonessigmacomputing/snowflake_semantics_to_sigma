@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { executeView, type SigmaWriter } from '../src/execute.js';
 import { SigmaApiError, type DataModelColumn } from '../src/sigma/client.js';
-import { canonicalSha256, type LockEntry } from '../src/lock.js';
+import { specHash, type LockEntry } from '../src/lock.js';
 import type { Decision } from '../src/decide.js';
 import type { ViewSource } from '../src/discover.js';
 
@@ -47,7 +47,7 @@ const view: ViewSource = { key: 'D.S.V', name: { database: 'D', schema: 'S', vie
 const spec = { schemaVersion: 1, pages: [{ id: 'p', elements: [] }] };
 const dir = () => mkdtempSync(join(tmpdir(), 'ssv-exec-'));
 const base = (decision: Decision, over: Record<string, unknown> = {}) => ({ view, decision, spec, modelName: 'V', folderId: 'fld', findings: [], dryRun: false, preUpdateDir: dir(), ...over });
-const lockFor = (s: FakeSigma, id: string): LockEntry => ({ dataModelId: id, specSha256: canonicalSha256(s.models.get(id)) } as LockEntry);
+const lockFor = (s: FakeSigma, id: string): LockEntry => ({ dataModelId: id, specSha256: specHash(s.models.get(id)!) } as LockEntry);
 
 test('dry run never calls write methods', async () => {
   const s = new FakeSigma();
@@ -71,7 +71,7 @@ test('create happy path', async () => {
   assert.equal(o.status, 'created');
   assert.equal(o.dataModelId, 'new-1');
   assert.deepEqual((s.calls[0].body as any).name, 'V');
-  assert.equal(o.specSha256, canonicalSha256(s.models.get('new-1')));
+  assert.equal(o.specSha256, specHash(s.models.get('new-1')!));
   assert.deepEqual(o.getBackSpec, s.models.get('new-1'));
 });
 
@@ -270,4 +270,14 @@ test('an update Sigma rejected (4xx) is not rolled back, since nothing was appli
   assert.equal(s.calls.filter(c => c.op === 'update').length, 1);
   assert.match(o.error!, /rejected/);
   assert.equal(o.keepInLock, undefined);
+});
+
+test('metadata-only changes in Sigma are not drift', async () => {
+  const s = new FakeSigma();
+  s.models.set('dm1', { schemaVersion: 1, pages: ['same'], documentVersion: 1, updatedAt: 't1' });
+  const lockEntry = lockFor(s, 'dm1');
+  s.models.set('dm1', { schemaVersion: 1, pages: ['same'], documentVersion: 2, updatedAt: 't2', name: 'renamed in Sigma' });
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry }));
+  assert.equal(o.status, 'updated');
+  assert.equal(o.drift, false);
 });

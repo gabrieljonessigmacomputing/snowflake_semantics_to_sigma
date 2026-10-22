@@ -15,7 +15,7 @@ export interface LockEntry {
   sourceSha256: string;
   optionsSha256: string;
   engineCommit: string;
-  /** canonicalSha256 of the spec Sigma returned after the last deploy (drift detection). */
+  /** specHash of the spec Sigma returned after the last deploy (drift detection). */
   specSha256: string;
   lastDeployedAt: string;
   orphaned: boolean;
@@ -80,6 +80,11 @@ export function writeLock(path: string, lock: Lock): void {
 /** sha256 of the value's JSON with object keys sorted recursively. */
 export function canonicalSha256(value: unknown): string {
   return createHash('sha256').update(JSON.stringify(sortKeys(value))).digest('hex');
+}
+
+/** Hash of a data model's content (schemaVersion + pages), ignoring Sigma metadata such as documentVersion, updatedAt, name and folder. */
+export function specHash(spec: Record<string, unknown>): string {
+  return canonicalSha256({ schemaVersion: spec.schemaVersion ?? null, pages: spec.pages ?? [] });
 }
 
 export function selectViews(

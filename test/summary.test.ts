@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderSummary } from '../src/summary.js';
+import { renderSummary, driftWarnings } from '../src/summary.js';
 import type { RunResult } from '../src/run.js';
 
 const result: RunResult = {
@@ -40,4 +40,15 @@ test('a clean run has only the table', () => {
   assert.ok(md.includes('| D.S.OK | created | dm-1 | 0 | 0 |'));
   assert.ok(!md.includes('offline'));
   assert.ok(!md.includes('Orphaned'));
+});
+
+test('drift warnings say whether the model was overwritten', () => {
+  const w = driftWarnings({ ...result, outcomes: [
+    { key: 'D.S.A', status: 'updated', dataModelId: 'dm-a', modelName: 'A', drift: true, findings: [] },
+    { key: 'D.S.B', status: 'failed', dataModelId: 'dm-b', modelName: 'B', drift: true, findings: [] },
+    { key: 'D.S.C', status: 'updated', dataModelId: 'dm-c', modelName: 'C', drift: false, findings: [] },
+  ] });
+  assert.equal(w.length, 2);
+  assert.match(w[0], /D\.S\.A: data model dm-a was edited in Sigma since the last sync; overwritten from git/);
+  assert.match(w[1], /D\.S\.B: data model dm-b was edited in Sigma since the last sync; it was not changed by this run/);
 });
