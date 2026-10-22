@@ -1,0 +1,29 @@
+# .github/workflows/sigma-semantic-check.yml
+# Dry run on pull requests: convert changed views and report refusals in the
+# job summary. Writes nothing to Sigma or the repo. Fork PRs (no secrets) run
+# offline and still report conversion findings.
+name: Check semantic views
+
+on:
+  pull_request:
+    paths: ['semantic_views/**']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sigmacomputing/snowflake_semantics_to_sigma@v1
+        with:
+          sigma_base_url: ${{ vars.SIGMA_BASE_URL }}
+          sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
+          sigma_client_secret: ${{ secrets.SIGMA_CLIENT_SECRET }}
+          connection_id: ${{ vars.SIGMA_CONNECTION_ID }}
+          folder_id: ${{ vars.SIGMA_FOLDER_ID }}
+          paths: semantic_views/**/*.{yaml,yml,sql}
+          database: ANALYTICS
+          schema: SEMANTIC
+          # dry_run defaults to true on pull_request events

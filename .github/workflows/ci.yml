@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: dist/ is up to date
+        run: |
+          npm run build
+          git diff --exit-code dist/ || { echo "::error::dist/ is stale — run npm run build and commit"; exit 1; }
+      - name: Vendored engine gates
+        # Needs read access to the internal sigmacomputing/semantic-tools repo.
+        env:
+          SEMANTIC_TOOLS_TOKEN: ${{ secrets.SEMANTIC_TOOLS_TOKEN }}
+        run: |
+          if [ -z "$SEMANTIC_TOOLS_TOKEN" ]; then
+            echo "::notice::SEMANTIC_TOOLS_TOKEN not set; skipping the vendored-engine check (unit tests still pin the engine commit)"
+            exit 0
+          fi
+          git clone -q "https://x-access-token:${SEMANTIC_TOOLS_TOKEN}@github.com/sigmacomputing/semantic-tools.git" .cache/semantic-tools
+          git -C .cache/semantic-tools checkout -q "$(cat semantic-tools-embed/PIN)"
+          npm run check:semantic-tools
