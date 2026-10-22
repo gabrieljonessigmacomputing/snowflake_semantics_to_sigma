@@ -47,7 +47,7 @@ const view: ViewSource = { key: 'D.S.V', name: { database: 'D', schema: 'S', vie
 const spec = { schemaVersion: 1, pages: [{ id: 'p', elements: [] }] };
 const dir = () => mkdtempSync(join(tmpdir(), 'ssv-exec-'));
 const base = (decision: Decision, over: Record<string, unknown> = {}) => ({ view, decision, spec, modelName: 'V', folderId: 'fld', findings: [], dryRun: false, preUpdateDir: dir(), ...over });
-const lockFor = (s: FakeSigma, id: string): LockEntry => ({ dataModelId: id, specSha256: specHash(s.models.get(id)!) } as LockEntry);
+const lockFor = (s: FakeSigma, id: string): LockEntry => ({ dataModelId: id, specSha256: specHash(s.models.get(id)!), specHashVersion: 2 } as LockEntry);
 
 test('dry run never calls write methods', async () => {
   const s = new FakeSigma();
@@ -290,4 +290,16 @@ test('legacy full-spec lock hashes are not reported as drift', async () => {
   assert.equal(o.status, 'updated');
   assert.equal(o.drift, false);
   assert.equal(o.specSha256, specHash(s.models.get('dm1')!));
+});
+
+test('a lock hash written by an older version is not reported as drift', async () => {
+  const { canonicalSha256 } = await import('../src/lock.js');
+  const s = new FakeSigma();
+  s.models.set('dm1', { schemaVersion: 1, pages: ['same'], documentVersion: 3, updatedAt: 't' });
+  // v0 lockfiles hashed the whole GET body and carry no specHashVersion.
+  const legacy = { dataModelId: 'dm1', specSha256: canonicalSha256(s.models.get('dm1')) };
+  s.models.get('dm1')!.documentVersion = 4;
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { lockEntry: legacy }));
+  assert.equal(o.status, 'updated');
+  assert.equal(o.drift, false);
 });

@@ -43,7 +43,7 @@ test('applyOutcomes writes full entries for created, updated and adopted', () =>
     outcome('U', 'updated', { dataModelId: 'old', specSha256: 's2' }),
     outcome('A', 'adopted', { dataModelId: 'a1', specSha256: 's3' }),
   ], [view('C'), view('U'), view('A')], ctx, []);
-  assert.deepEqual(out.views.C, { dataModelId: 'c1', modelName: 'C', sourcePath: 'C.sql', sourceSha256: 'sha-C', optionsSha256: 'opt', engineCommit: 'eng', specSha256: 's1', lastDeployedAt: ctx.now, orphaned: false });
+  assert.deepEqual(out.views.C, { dataModelId: 'c1', modelName: 'C', sourcePath: 'C.sql', sourceSha256: 'sha-C', optionsSha256: 'opt', engineCommit: 'eng', specSha256: 's1', specHashVersion: 2, lastDeployedAt: ctx.now, orphaned: false });
   assert.equal(out.views.U.specSha256, 's2');
   assert.equal(out.views.U.sourceSha256, 'sha-U');
   assert.equal(out.views.A.dataModelId, 'a1');

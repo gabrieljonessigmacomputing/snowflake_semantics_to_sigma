@@ -39,6 +39,14 @@ test('writeLock is stable', () => {
   assert.ok(textA.indexOf('"A.V"') < textA.indexOf('"B.V"'));
 });
 
+test('specHashVersion is optional but must be a number when present', () => {
+  const p = join(tmp(), 'lock.json');
+  writeFileSync(p, JSON.stringify({ version: 1, views: { A: { ...entry(), specHashVersion: 2 }, B: entry() } }));
+  assert.equal(readLock(p).views.A.specHashVersion, 2);
+  writeFileSync(p, JSON.stringify({ version: 1, views: { A: { ...entry(), specHashVersion: 'two' } } }));
+  assert.throws(() => readLock(p), LockError);
+});
+
 test('canonicalSha256 ignores key order', () => {
   assert.equal(canonicalSha256({ a: 1, b: { c: 2, d: 3 } }), canonicalSha256({ b: { d: 3, c: 2 }, a: 1 }));
   assert.notEqual(canonicalSha256({ a: [1, 2] }), canonicalSha256({ a: [2, 1] }));

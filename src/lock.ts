@@ -17,6 +17,8 @@ export interface LockEntry {
   engineCommit: string;
   /** specHash of the spec Sigma returned after the last deploy (drift detection). */
   specSha256: string;
+  /** 2 = specSha256 is a specHash (content only). Absent in v0 lockfiles, whose hash covered the whole GET body and cannot be compared. */
+  specHashVersion?: 2;
   lastDeployedAt: string;
   orphaned: boolean;
 }
@@ -56,6 +58,7 @@ export function readLock(path: string): Lock {
     if (!e || typeof e !== 'object') return fail(`entry ${key} is not an object`);
     for (const field of ENTRY_STRINGS) if (typeof e[field] !== 'string') return fail(`entry ${key} has no string "${field}"`);
     if (typeof e.orphaned !== 'boolean') return fail(`entry ${key} has no boolean "orphaned"`);
+    if (e.specHashVersion !== undefined && typeof e.specHashVersion !== 'number') return fail(`entry ${key} has a non-numeric "specHashVersion"`);
   }
   return lock as unknown as Lock;
 }
@@ -83,6 +86,8 @@ export function canonicalSha256(value: unknown): string {
 }
 
 /** Hash of a data model's content (schemaVersion + pages), ignoring Sigma metadata such as documentVersion, updatedAt, name and folder. */
+export const SPEC_HASH_VERSION = 2 as const;
+
 export function specHash(spec: Record<string, unknown>): string {
   return canonicalSha256({ schemaVersion: spec.schemaVersion ?? null, pages: spec.pages ?? [] });
 }

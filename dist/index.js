@@ -146545,6 +146545,7 @@ function readLock(path) {
     if (!e || typeof e !== "object") return fail(`entry ${key} is not an object`);
     for (const field of ENTRY_STRINGS) if (typeof e[field] !== "string") return fail(`entry ${key} has no string "${field}"`);
     if (typeof e.orphaned !== "boolean") return fail(`entry ${key} has no boolean "orphaned"`);
+    if (e.specHashVersion !== void 0 && typeof e.specHashVersion !== "number") return fail(`entry ${key} has a non-numeric "specHashVersion"`);
   }
   return lock;
 }
@@ -146564,6 +146565,7 @@ function writeLock(path, lock) {
 function canonicalSha256(value) {
   return createHash("sha256").update(JSON.stringify(sortKeys(value))).digest("hex");
 }
+var SPEC_HASH_VERSION = 2;
 function specHash(spec) {
   return canonicalSha256({ schemaVersion: spec.schemaVersion ?? null, pages: spec.pages ?? [] });
 }
@@ -160551,8 +160553,8 @@ async function update(client, args, out, kind) {
     return { ...out, error: message(e) };
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
-  const known = args.lockEntry?.specSha256;
-  const drift = kind === "update" && !!known && specHash(pre) !== known && canonicalSha256(pre) !== known;
+  const known = args.lockEntry?.specHashVersion === SPEC_HASH_VERSION ? args.lockEntry.specSha256 : "";
+  const drift = kind === "update" && !!known && specHash(pre) !== known;
   out.drift = drift;
   if (drift || kind === "adopt") savePre(args.preUpdateDir, args.view.key, pre);
   const body = {
@@ -160617,6 +160619,7 @@ function applyOutcomes(lock, outcomes, views, ctx, orphans) {
         optionsSha256: ctx.optionsSha256,
         engineCommit: ctx.engineCommit,
         specSha256: o.specSha256,
+        specHashVersion: SPEC_HASH_VERSION,
         lastDeployedAt: ctx.now,
         orphaned: false
       };

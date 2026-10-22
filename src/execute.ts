@@ -9,7 +9,7 @@ import type { EmbedFinding } from './convert.js';
 import type { Decision } from './decide.js';
 import type { ViewSource } from './discover.js';
 import { keyFileName } from './identity.js';
-import { canonicalSha256, specHash, type LockEntry } from './lock.js';
+import { SPEC_HASH_VERSION, specHash, type LockEntry } from './lock.js';
 import { preserveIds } from './preserve-ids.js';
 import { SigmaApiError, type SigmaClient } from './sigma/client.js';
 
@@ -40,7 +40,7 @@ export interface ExecuteArgs {
   spec?: Record<string, unknown>;
   modelName: string;
   folderId?: string;
-  lockEntry?: Pick<LockEntry, 'dataModelId' | 'specSha256'>;
+  lockEntry?: Pick<LockEntry, 'dataModelId' | 'specSha256' | 'specHashVersion'>;
   findings: EmbedFinding[];
   dryRun: boolean;
   /** Where pre-update specs are saved (drift / adopt) for the run artifact. */
@@ -145,8 +145,9 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
     return { ...out, error: message(e) };
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
-  const known = args.lockEntry?.specSha256;
-  const drift = kind === 'update' && !!known && specHash(pre) !== known && canonicalSha256(pre) !== known;
+  // A hash from an older lock format (no specHashVersion) can't be compared: treat drift as unknown.
+  const known = args.lockEntry?.specHashVersion === SPEC_HASH_VERSION ? args.lockEntry.specSha256 : '';
+  const drift = kind === 'update' && !!known && specHash(pre) !== known;
   out.drift = drift;
   if (drift || kind === 'adopt') savePre(args.preUpdateDir, args.view.key, pre);
 
