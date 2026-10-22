@@ -1,0 +1,108 @@
+name: Snowflake Semantic Views to Sigma
+description: Keep one Sigma data model in sync with each Snowflake semantic view (YAML or CREATE SEMANTIC VIEW DDL) in your repo.
+author: Sigma Computing
+branding:
+  icon: database
+  color: blue
+
+inputs:
+  sigma_base_url:
+    description: Sigma API host, e.g. https://aws-api.sigmacomputing.com. Required unless dry_run is true.
+    required: false
+  sigma_client_id:
+    description: Sigma API client ID (store as a secret). Required unless dry_run is true.
+    required: false
+  sigma_client_secret:
+    description: Sigma API client secret (store as a secret). Required unless dry_run is true.
+    required: false
+  connection_id:
+    description: Sigma connection the data models read from. Set this or connection_name.
+    required: false
+  connection_name:
+    description: Sigma connection, by exact name. Set this or connection_id.
+    required: false
+  folder_id:
+    description: Sigma folder new data models are created in. Set this or folder_name.
+    required: false
+  folder_name:
+    description: Sigma folder, by exact name. Set this or folder_id.
+    required: false
+  paths:
+    description: Glob(s), newline-separated, for semantic view files. Files that are not semantic views are skipped.
+    required: false
+    default: '**/*.{yml,yaml,sql}'
+  database:
+    description: Database of the semantic views (YAML has no qualifier) and default for table references with fewer than 3 parts.
+    required: false
+  schema:
+    description: Schema of the semantic views (YAML has no qualifier) and default for table references with fewer than 2 parts.
+    required: false
+  mode:
+    description: "auto: views whose file, engine or options changed since the last sync. all: every view. Default: all on workflow_dispatch, auto otherwise."
+    required: false
+    default: ''
+  dry_run:
+    description: Convert and report only; write nothing to Sigma or the repo. Default true on pull_request events.
+    required: false
+    default: ''
+  best_effort:
+    description: Convert constructs the engine would otherwise refuse (differences are reported).
+    required: false
+    default: 'false'
+  fail_on_refused:
+    description: Fail the run when any view is refused.
+    required: false
+    default: 'true'
+  lock_file:
+    description: Lockfile mapping each view to its Sigma data model.
+    required: false
+    default: sigma/semantic-views.lock.json
+  save_specs:
+    description: Save the spec Sigma returns for each deployed data model.
+    required: false
+    default: 'true'
+  specs_dir:
+    description: Directory for saved specs.
+    required: false
+    default: sigma/models
+  commit_mode:
+    description: "How state is written back: push (commit to the branch), pull_request (bot PR, for protected branches) or none."
+    required: false
+    default: push
+  adopt_existing:
+    description: Take over a same-named data model in the target folder that the lockfile does not track.
+    required: false
+    default: 'false'
+  model_name_template:
+    description: Sigma data model name; placeholders {database}, {schema}, {view}.
+    required: false
+    default: '{view}'
+  column_types_file:
+    description: 'Optional JSON file { "DB.SCHEMA.TABLE": { "COLUMN": "TYPE" } } enabling the engine''s time-zone checks.'
+    required: false
+  git_user_name:
+    description: Commit author name for state commits.
+    required: false
+    default: github-actions[bot]
+  git_user_email:
+    description: Commit author email for state commits.
+    required: false
+    default: 41898282+github-actions[bot]@users.noreply.github.com
+  github_token:
+    description: Token used to open the state pull request (commit_mode pull_request).
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  created:
+    description: JSON array of view keys whose data model was created.
+  updated:
+    description: JSON array of view keys whose data model was updated (including adopted).
+  refused:
+    description: JSON array of view keys that were refused.
+  orphaned:
+    description: JSON array of view keys in the lockfile that are no longer defined in the repo.
+
+runs:
+  using: node24
+  main: dist/index.js
