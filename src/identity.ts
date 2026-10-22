@@ -146,3 +146,8 @@ export function findNameCollisions(views: { key: string; name: QualifiedName }[]
   }
   return [...byName.values()].filter(keys => keys.length > 1).map(keys => keys.sort());
 }
+
+/** A view key made safe as a single file name (no path separators, no `..`). */
+export function keyFileName(key: string): string {
+  return key.replace(/[/\\]/g, '_').replace(/\.\.+/g, '_');
+}
