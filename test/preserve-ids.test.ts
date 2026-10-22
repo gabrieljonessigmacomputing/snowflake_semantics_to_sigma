@@ -14,6 +14,8 @@ const model = (golden: string) => {
 const STAR = model('star_schema_ddl_sql');
 const RETAIL = model('retail_analytics_sv_best_effort_sql');
 const el = (spec: any, pred: (e: any) => boolean) => spec.pages.flatMap((p: any) => p.elements).find(pred);
+const factOf = (spec: any) => spec.pages.flatMap((p: any) => p.elements).find((e: any) => (e.metrics ?? []).length > 0 && (e.columns ?? []).length > 0);
+const FACT = factOf(STAR);
 
 test('unchanged conversion maps every id and reference to the live one', () => {
   for (const spec of [STAR, RETAIL]) {
@@ -27,23 +29,32 @@ test('unchanged conversion maps every id and reference to the live one', () => {
 test('an added metric keeps its placeholder id while everything else keeps live ids', () => {
   const live = serverRemap(STAR, { addNames: true });
   const next = structuredClone(STAR);
-  el(next, (e: any) => e.id === 'lineitem').metrics.push({ id: 'lineitem__m__max_qty', formula: 'Max([L Quantity])', name: 'Max Quantity' });
+  const addedId = `${FACT.id}__m__max_qty`;
+  el(next, (e: any) => e.id === FACT.id).metrics.push({ id: addedId, formula: 'Max([L Quantity])', name: 'Max Quantity' });
   const { spec: out, fresh } = preserveIds(next, live);
   const liveIds = new Set(collectIds(live));
   const outIds = collectIds(out);
-  assert.deepEqual(outIds.filter(id => !liveIds.has(id)), ['lineitem__m__max_qty']);
+  assert.deepEqual(outIds.filter(id => !liveIds.has(id)), [addedId]);
   assert.equal(fresh, 1);
 });
 
-test('derived elements over the same source match by name, not position', () => {
-  const live = serverRemap(RETAIL, { addNames: true });
-  const next = structuredClone(RETAIL);
+test('elements that read the same source match by name, not position', () => {
+  const base = {
+    schemaVersion: 1,
+    pages: [{ id: 'page1', elements: [
+      { id: 'orders', kind: 'table', name: 'Orders', source: { kind: 'warehouse-table', connectionId: 'c', path: ['DB', 'SC', 'ORDER_FACT'] }, columns: [{ id: 'orders__id', formula: '[ORDER_FACT/ORDER_ID]' }] },
+      { id: 'ship', kind: 'table', name: 'Order Fact (via Ship Date)', source: { kind: 'table', elementId: 'orders' }, columns: [{ id: 'ship__c', formula: '[Ship Date]' }] },
+      { id: 'ret', kind: 'table', name: 'Order Fact (via Return Date)', source: { kind: 'table', elementId: 'orders' }, columns: [{ id: 'ret__c', formula: '[Return Date]' }] },
+    ] }],
+  };
+  const live = serverRemap(base, { addNames: true });
+  const next = structuredClone(base);
   const els = next.pages[0].elements;
-  const a = els.findIndex((e: any) => e.name === 'ORDER_FACT (via Order To Ship Date)');
-  const b = els.findIndex((e: any) => e.name === 'ORDER_FACT (via Order To Return Date)');
+  const a = els.findIndex((e: any) => e.name === 'Order Fact (via Ship Date)');
+  const b = els.findIndex((e: any) => e.name === 'Order Fact (via Return Date)');
   [els[a], els[b]] = [els[b], els[a]];
   const { spec: out } = preserveIds(next, live);
-  for (const name of ['ORDER_FACT (via Order To Ship Date)', 'ORDER_FACT (via Order To Return Date)']) {
+  for (const name of ['Order Fact (via Ship Date)', 'Order Fact (via Return Date)']) {
     assert.equal(el(out, (e: any) => e.name === name).id, el(live, (e: any) => e.name === name).id, name);
   }
 });
@@ -51,21 +62,22 @@ test('derived elements over the same source match by name, not position', () => 
 test('a renamed metric keeps its id when the formula is unchanged', () => {
   const live = serverRemap(STAR, { addNames: true });
   const next = structuredClone(STAR);
-  const m = el(next, (e: any) => e.id === 'lineitem').metrics.find((x: any) => x.name === 'Total Revenue');
+  const metricName = FACT.metrics[0].name;
+  const m = el(next, (e: any) => e.id === FACT.id).metrics.find((x: any) => x.name === metricName);
   m.name = 'Net Revenue';
   const { spec: out } = preserveIds(next, live);
-  const liveId = el(live, (e: any) => e.name === 'LINEITEM').metrics.find((x: any) => x.name === 'Total Revenue').id;
-  assert.equal(el(out, (e: any) => e.id === el(live, (x: any) => x.name === 'LINEITEM').id).metrics.find((x: any) => x.name === 'Net Revenue').id, liveId);
+  const liveId = el(live, (e: any) => e.name === FACT.name).metrics.find((x: any) => x.name === metricName).id;
+  assert.equal(el(out, (e: any) => e.id === el(live, (x: any) => x.name === FACT.name).id).metrics.find((x: any) => x.name === 'Net Revenue').id, liveId);
 });
 
 test('reordered columns keep their ids (matched by formula)', () => {
   const live = serverRemap(STAR, { addNames: true });
   const next = structuredClone(STAR);
-  el(next, (e: any) => e.id === 'lineitem').columns.reverse();
+  el(next, (e: any) => e.id === FACT.id).columns.reverse();
   const { spec: out, fresh } = preserveIds(next, live);
   assert.equal(fresh, 0);
-  const liveCols = el(live, (e: any) => e.name === 'LINEITEM').columns;
-  const outCols = el(out, (e: any) => e.id === el(live, (x: any) => x.name === 'LINEITEM').id).columns;
+  const liveCols = el(live, (e: any) => e.name === FACT.name).columns;
+  const outCols = el(out, (e: any) => e.id === el(live, (x: any) => x.name === FACT.name).id).columns;
   for (const c of outCols) assert.equal(c.id, liveCols.find((l: any) => l.formula === c.formula).id);
 });
 

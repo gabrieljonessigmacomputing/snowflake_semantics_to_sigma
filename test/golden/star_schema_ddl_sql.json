@@ -13,9 +13,9 @@
       "ok": true,
       "model": {
         "name": "SALES_VIEW",
+        "description": "Sigma data model for the Snowflake semantic view ANALYTICS.MODELS.SALES_VIEW: 3 tables, 15 columns, 2 relationships. Semantic-view metrics are translated as written. Facts are columns.\n\nSales star schema (lineitem, orders, customer)\n\nGrain: Orders: one row per o_orderkey. Customer: one row per c_custkey.\n\nMetrics are not pre-filtered. AI instructions are not stored on the model (Sigma has no API for that); they are in the AI context file.",
         "schemaVersion": 1,
         "kind": "data-model",
-        "description": "Sales star schema (lineitem, orders, customer)",
         "pages": [
           {
             "id": "page1",
@@ -24,10 +24,10 @@
               {
                 "id": "lineitem",
                 "kind": "table",
-                "description": "Order lines, one row per part shipped",
+                "name": "Lineitem",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SNOWFLAKE_SAMPLE_DATA",
                     "TPCH_SF1",
@@ -36,68 +36,83 @@
                 },
                 "columns": [
                   {
-                    "id": "lineitem__l_quantity",
-                    "formula": "[LINEITEM/L Quantity]"
+                    "id": "lineitem__net_price",
+                    "name": "Net Price",
+                    "formula": "[L Extendedprice] * (1 - [L Dis Count])",
+                    "description": "Discounted line price, don't use directly"
                   },
                   {
-                    "id": "lineitem__l_orderkey",
-                    "formula": "[LINEITEM/L Orderkey]"
+                    "id": "lineitem__l_quantity",
+                    "name": "L Quantity",
+                    "formula": "[LINEITEM/L_QUANTITY]"
                   },
                   {
                     "id": "lineitem__l_extendedprice",
-                    "formula": "[LINEITEM/L Extendedprice]"
+                    "name": "L Extendedprice",
+                    "formula": "[LINEITEM/L_EXTENDEDPRICE]"
                   },
                   {
                     "id": "lineitem__l_discount",
-                    "formula": "[LINEITEM/L Discount]"
+                    "name": "L Dis Count",
+                    "formula": "[LINEITEM/L_DISCOUNT]"
+                  },
+                  {
+                    "id": "lineitem__l_orderkey",
+                    "name": "L Orderkey",
+                    "formula": "[LINEITEM/L_ORDERKEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
                 ],
+                "description": "Order lines, one row per part shipped",
                 "metrics": [
                   {
                     "id": "lineitem__m__total_revenue",
-                    "formula": "Sum([L Extendedprice] * (1 - [L Discount]))",
                     "name": "Total Revenue",
-                    "description": "Revenue net of discount"
+                    "formula": "Sum([Net Price])",
+                    "description": "Revenue net of discount Semantic view definition: SUM(net_price)"
                   },
                   {
                     "id": "lineitem__m__average_quantity",
+                    "name": "Average Quantity",
                     "formula": "Avg([L Quantity])",
-                    "name": "Average Quantity"
+                    "description": "Semantic view definition: AVG(l_quantity)"
                   },
                   {
                     "id": "lineitem__m__distinct_orders",
+                    "name": "Distinct Orders",
                     "formula": "CountDistinct([L Orderkey])",
-                    "name": "Distinct Orders"
+                    "description": "Semantic view definition: COUNT(DISTINCT l_orderkey)"
                   }
                 ],
                 "relationships": [
                   {
                     "id": "lineitem__to__orders",
-                    "targetElementId": "orders__joined",
+                    "name": "Lines to Orders",
+                    "targetElementId": "orders",
                     "keys": [
                       {
                         "sourceColumnId": "lineitem__l_orderkey",
                         "targetColumnId": "orders__o_orderkey"
                       }
                     ],
-                    "name": "Lines To Orders",
                     "relationshipType": "N:1"
                   }
                 ],
                 "order": [
+                  "lineitem__net_price",
                   "lineitem__l_quantity",
-                  "lineitem__l_orderkey",
                   "lineitem__l_extendedprice",
-                  "lineitem__l_discount"
+                  "lineitem__l_discount",
+                  "lineitem__l_orderkey"
                 ]
               },
               {
                 "id": "orders",
                 "kind": "table",
-                "description": "One row per order. Also known as: sales orders, purchase orders",
+                "name": "Orders",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SNOWFLAKE_SAMPLE_DATA",
                     "TPCH_SF1",
@@ -107,30 +122,48 @@
                 "columns": [
                   {
                     "id": "orders__o_orderstatus",
-                    "formula": "[ORDERS/O Orderstatus]",
-                    "description": "Also known as: status"
+                    "name": "Status",
+                    "formula": "[ORDERS/O_ORDERSTATUS]",
+                    "description": "Also called: status."
+                  },
+                  {
+                    "id": "orders__customer_name",
+                    "name": "Customer Name",
+                    "formula": "[Orders to Customer/C Name]"
                   },
                   {
                     "id": "orders__order_month",
-                    "formula": "DateTrunc(\"month\", [O Orderdate])",
-                    "name": "Order Month"
+                    "name": "Order Month",
+                    "formula": "DateTrunc([Month], [O Order Date])"
                   },
                   {
-                    "id": "orders__o_orderkey",
-                    "formula": "[ORDERS/O Orderkey]"
-                  },
-                  {
-                    "id": "orders__o_custkey",
-                    "formula": "[ORDERS/O Custkey]"
+                    "id": "orders__month",
+                    "name": "Month",
+                    "formula": "[ORDERS/MONTH]"
                   },
                   {
                     "id": "orders__o_orderdate",
-                    "formula": "[ORDERS/O Orderdate]"
+                    "name": "O Order Date",
+                    "formula": "[ORDERS/O_ORDERDATE]"
+                  },
+                  {
+                    "id": "orders__o_orderkey",
+                    "name": "O Orderkey",
+                    "formula": "[ORDERS/O_ORDERKEY]",
+                    "description": "Helper column: used by the semantic view's own metrics but not declared as a field."
+                  },
+                  {
+                    "id": "orders__o_custkey",
+                    "name": "O Custkey",
+                    "formula": "[ORDERS/O_CUSTKEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
                 ],
+                "description": "One row per order Also called: sales orders, purchase orders.",
                 "relationships": [
                   {
                     "id": "orders__to__customer",
+                    "name": "Orders to Customer",
                     "targetElementId": "customer",
                     "keys": [
                       {
@@ -138,74 +171,26 @@
                         "targetColumnId": "customer__c_custkey"
                       }
                     ],
-                    "name": "Orders To Customer",
                     "relationshipType": "N:1"
-                  }
-                ],
-                "uniqueKeys": [
-                  "orders__o_orderkey"
-                ],
-                "order": [
-                  "orders__o_orderstatus",
-                  "orders__order_month",
-                  "orders__o_orderkey",
-                  "orders__o_custkey",
-                  "orders__o_orderdate"
-                ]
-              },
-              {
-                "id": "orders__joined",
-                "kind": "table",
-                "name": "ORDERS (joined)",
-                "description": "One row per order. Also known as: sales orders, purchase orders. Includes columns from related tables: Customer Name.",
-                "source": {
-                  "kind": "table",
-                  "elementId": "orders"
-                },
-                "columns": [
-                  {
-                    "id": "orders__o_orderstatus",
-                    "formula": "[ORDERS/O Orderstatus]",
-                    "description": "Also known as: status"
-                  },
-                  {
-                    "id": "orders__customer_name",
-                    "formula": "[ORDERS/Orders To Customer/C Name]",
-                    "name": "Customer Name"
-                  },
-                  {
-                    "id": "orders__order_month",
-                    "formula": "[ORDERS/Order Month]",
-                    "name": "Order Month"
-                  },
-                  {
-                    "id": "orders__o_orderkey",
-                    "formula": "[ORDERS/O Orderkey]"
-                  },
-                  {
-                    "id": "orders__o_custkey",
-                    "formula": "[ORDERS/O Custkey]"
-                  },
-                  {
-                    "id": "orders__o_orderdate",
-                    "formula": "[ORDERS/O Orderdate]"
                   }
                 ],
                 "order": [
                   "orders__o_orderstatus",
                   "orders__customer_name",
                   "orders__order_month",
+                  "orders__month",
+                  "orders__o_orderdate",
                   "orders__o_orderkey",
-                  "orders__o_custkey",
-                  "orders__o_orderdate"
+                  "orders__o_custkey"
                 ]
               },
               {
                 "id": "customer",
                 "kind": "table",
+                "name": "Customer",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SNOWFLAKE_SAMPLE_DATA",
                     "TPCH_SF1",
@@ -214,18 +199,24 @@
                 },
                 "columns": [
                   {
+                    "id": "customer__order_count",
+                    "name": "Order Count",
+                    "formula": "Count([Orders/O Orderkey])"
+                  },
+                  {
                     "id": "customer__c_name",
-                    "formula": "[CUSTOMER/C Name]"
+                    "name": "C Name",
+                    "formula": "[CUSTOMER/C_NAME]"
                   },
                   {
                     "id": "customer__c_custkey",
-                    "formula": "[CUSTOMER/C Custkey]"
+                    "name": "C Custkey",
+                    "formula": "[CUSTOMER/C_CUSTKEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
                 ],
-                "uniqueKeys": [
-                  "customer__c_custkey"
-                ],
                 "order": [
+                  "customer__order_count",
                   "customer__c_name",
                   "customer__c_custkey"
                 ]
@@ -235,14 +226,15 @@
         ]
       },
       "findingCodes": [
-        "COPY_GRANTS_DROPPED",
-        "GRAIN_METADATA_NOT_EMITTED",
-        "MAX_STALENESS_DROPPED",
-        "PRIVATE_OBJECT",
-        "CROSS_TABLE_FACT_AGGREGATE",
-        "FILTER_LABEL",
-        "COLUMN_TYPES_SKIPPED",
-        "CROSS_TABLE_REFERENCES_MOVED"
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "PRIVATE",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN"
       ]
     }
   ]

@@ -46,7 +46,7 @@ inputs:
     required: false
     default: ''
   best_effort:
-    description: Convert constructs the engine would otherwise refuse (differences are reported).
+    description: Accepted for existing workflows. The converter already translates semi-additive metrics and USING pins, so this flag does not change the spec.
     required: false
     default: 'false'
   fail_on_refused:
@@ -78,7 +78,7 @@ inputs:
     required: false
     default: '{view}'
   column_types_file:
-    description: 'Optional JSON file { "DB.SCHEMA.TABLE": { "COLUMN": "TYPE" } } enabling the engine''s time-zone checks.'
+    description: 'Optional JSON file { "DB.SCHEMA.TABLE": { "COLUMN": "TYPE" } } used to spell physical columns and infer number formats.'
     required: false
   git_user_name:
     description: Commit author name for state commits.

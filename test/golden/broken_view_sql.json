@@ -1,0 +1,22 @@
+{
+  "fixture": "test/fixtures/broken_view.sql",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS"
+  },
+  "refused": true,
+  "refusedViews": [
+    "BROKEN_VIEW"
+  ],
+  "results": [
+    {
+      "viewName": "BROKEN_VIEW",
+      "ok": false,
+      "findingCodes": [
+        "HELPER_COLUMN",
+        "UNTRANSLATED"
+      ]
+    }
+  ]
+}

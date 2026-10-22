@@ -13,6 +13,7 @@
       "ok": true,
       "model": {
         "name": "UTILIZATION_SV",
+        "description": "Sigma data model for the Snowflake semantic view ANALYTICS.CLAIMS.UTILIZATION_SV: 6 tables, 17 columns, 7 relationships. Semantic-view metrics are translated as written. Facts are columns.\n\nGrain: Admissions: one row per admission_id. Member Months: one row per member_month_id. Dim Age Band: one row per age_band_key. Dim Region: one row per region_key. Dim Plan: one row per plan_key. Dim Facility: one row per facility_key.\n\nMetrics are not pre-filtered. AI instructions are not stored on the model (Sigma has no API for that); they are in the AI context file.",
         "schemaVersion": 1,
         "kind": "data-model",
         "pages": [
@@ -23,10 +24,10 @@
               {
                 "id": "admissions",
                 "kind": "table",
-                "description": "One row per inpatient admission",
+                "name": "Admissions",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -36,39 +37,48 @@
                 "columns": [
                   {
                     "id": "admissions__age_band_key",
-                    "formula": "[ADMISSIONS/Age Band Key]"
+                    "name": "Age Band Key",
+                    "formula": "[ADMISSIONS/AGE_BAND_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "admissions__region_key",
-                    "formula": "[ADMISSIONS/Region Key]"
+                    "name": "Region Key",
+                    "formula": "[ADMISSIONS/REGION_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "admissions__plan_key",
-                    "formula": "[ADMISSIONS/Plan Key]"
+                    "name": "Plan Key",
+                    "formula": "[ADMISSIONS/PLAN_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "admissions__facility_key",
-                    "formula": "[ADMISSIONS/Facility Key]"
-                  },
-                  {
-                    "id": "admissions__admission_id",
-                    "formula": "[ADMISSIONS/Admission Id]"
+                    "name": "Facility Key",
+                    "formula": "[ADMISSIONS/FACILITY_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "admissions__paid_admit_cnt",
-                    "formula": "[ADMISSIONS/Paid Admit Cnt]"
+                    "name": "Paid Admit Cnt",
+                    "formula": "[ADMISSIONS/PAID_ADMIT_CNT]",
+                    "description": "Helper column: used by the semantic view's own metrics but not declared as a field."
                   }
                 ],
+                "description": "One row per inpatient admission",
                 "metrics": [
                   {
                     "id": "admissions__m__admits",
+                    "name": "Admits",
                     "formula": "Sum([Paid Admit Cnt])",
-                    "name": "Admits"
+                    "description": "Semantic view definition: SUM(admissions.paid_admit_cnt)"
                   }
                 ],
                 "relationships": [
                   {
                     "id": "admissions__to__dim_age_band",
+                    "name": "Adm to Age",
                     "targetElementId": "dim_age_band",
                     "keys": [
                       {
@@ -76,11 +86,11 @@
                         "targetColumnId": "dim_age_band__age_band_key"
                       }
                     ],
-                    "name": "Adm To Age",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "admissions__to__dim_region",
+                    "name": "Adm to Region",
                     "targetElementId": "dim_region",
                     "keys": [
                       {
@@ -88,11 +98,11 @@
                         "targetColumnId": "dim_region__region_key"
                       }
                     ],
-                    "name": "Adm To Region",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "admissions__to__dim_plan",
+                    "name": "Adm to Plan",
                     "targetElementId": "dim_plan",
                     "keys": [
                       {
@@ -100,11 +110,11 @@
                         "targetColumnId": "dim_plan__plan_key"
                       }
                     ],
-                    "name": "Adm To Plan",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "admissions__to__dim_facility",
+                    "name": "Adm to Facility",
                     "targetElementId": "dim_facility",
                     "keys": [
                       {
@@ -112,29 +122,24 @@
                         "targetColumnId": "dim_facility__facility_key"
                       }
                     ],
-                    "name": "Adm To Facility",
                     "relationshipType": "N:1"
                   }
-                ],
-                "uniqueKeys": [
-                  "admissions__admission_id"
                 ],
                 "order": [
                   "admissions__age_band_key",
                   "admissions__region_key",
                   "admissions__plan_key",
                   "admissions__facility_key",
-                  "admissions__admission_id",
                   "admissions__paid_admit_cnt"
                 ]
               },
               {
                 "id": "member_months",
                 "kind": "table",
-                "description": "One row per member per month of coverage",
+                "name": "Member Months",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -144,35 +149,42 @@
                 "columns": [
                   {
                     "id": "member_months__age_band_key",
-                    "formula": "[MEMBER_MONTHS/Age Band Key]"
+                    "name": "Age Band Key",
+                    "formula": "[MEMBER_MONTHS/AGE_BAND_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "member_months__region_key",
-                    "formula": "[MEMBER_MONTHS/Region Key]"
+                    "name": "Region Key",
+                    "formula": "[MEMBER_MONTHS/REGION_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "member_months__plan_key",
-                    "formula": "[MEMBER_MONTHS/Plan Key]"
-                  },
-                  {
-                    "id": "member_months__member_month_id",
-                    "formula": "[MEMBER_MONTHS/Member Month Id]"
+                    "name": "Plan Key",
+                    "formula": "[MEMBER_MONTHS/PLAN_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   },
                   {
                     "id": "member_months__mm",
-                    "formula": "[MEMBER_MONTHS/Mm]"
+                    "name": "Mm",
+                    "formula": "[MEMBER_MONTHS/MM]",
+                    "description": "Helper column: used by the semantic view's own metrics but not declared as a field."
                   }
                 ],
+                "description": "One row per member per month of coverage",
                 "metrics": [
                   {
                     "id": "member_months__m__member_months_total",
+                    "name": "Member Months Total",
                     "formula": "Sum([Mm])",
-                    "name": "Member Months Total"
+                    "description": "Semantic view definition: SUM(member_months.mm)"
                   }
                 ],
                 "relationships": [
                   {
                     "id": "member_months__to__dim_age_band",
+                    "name": "Mm to Age",
                     "targetElementId": "dim_age_band",
                     "keys": [
                       {
@@ -180,11 +192,11 @@
                         "targetColumnId": "dim_age_band__age_band_key"
                       }
                     ],
-                    "name": "Mm To Age",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "member_months__to__dim_region",
+                    "name": "Mm to Region",
                     "targetElementId": "dim_region",
                     "keys": [
                       {
@@ -192,11 +204,11 @@
                         "targetColumnId": "dim_region__region_key"
                       }
                     ],
-                    "name": "Mm To Region",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "member_months__to__dim_plan",
+                    "name": "Mm to Plan",
                     "targetElementId": "dim_plan",
                     "keys": [
                       {
@@ -204,27 +216,23 @@
                         "targetColumnId": "dim_plan__plan_key"
                       }
                     ],
-                    "name": "Mm To Plan",
                     "relationshipType": "N:1"
                   }
-                ],
-                "uniqueKeys": [
-                  "member_months__member_month_id"
                 ],
                 "order": [
                   "member_months__age_band_key",
                   "member_months__region_key",
                   "member_months__plan_key",
-                  "member_months__member_month_id",
                   "member_months__mm"
                 ]
               },
               {
                 "id": "dim_age_band",
                 "kind": "table",
+                "name": "Dim Age Band",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -234,15 +242,15 @@
                 "columns": [
                   {
                     "id": "dim_age_band__age_band",
-                    "formula": "[DIM_AGE_BAND/Age Band]"
+                    "name": "Age Band",
+                    "formula": "[DIM_AGE_BAND/AGE_BAND]"
                   },
                   {
                     "id": "dim_age_band__age_band_key",
-                    "formula": "[DIM_AGE_BAND/Age Band Key]"
+                    "name": "Age Band Key",
+                    "formula": "[DIM_AGE_BAND/AGE_BAND_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
-                ],
-                "uniqueKeys": [
-                  "dim_age_band__age_band_key"
                 ],
                 "order": [
                   "dim_age_band__age_band",
@@ -252,9 +260,10 @@
               {
                 "id": "dim_region",
                 "kind": "table",
+                "name": "Dim Region",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -264,15 +273,15 @@
                 "columns": [
                   {
                     "id": "dim_region__region_name",
-                    "formula": "[DIM_REGION/Region Name]"
+                    "name": "Region Name",
+                    "formula": "[DIM_REGION/REGION_NAME]"
                   },
                   {
                     "id": "dim_region__region_key",
-                    "formula": "[DIM_REGION/Region Key]"
+                    "name": "Region Key",
+                    "formula": "[DIM_REGION/REGION_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
-                ],
-                "uniqueKeys": [
-                  "dim_region__region_key"
                 ],
                 "order": [
                   "dim_region__region_name",
@@ -282,9 +291,10 @@
               {
                 "id": "dim_plan",
                 "kind": "table",
+                "name": "Dim Plan",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -294,15 +304,15 @@
                 "columns": [
                   {
                     "id": "dim_plan__plan_name",
-                    "formula": "[DIM_PLAN/Plan Name]"
+                    "name": "Plan Name",
+                    "formula": "[DIM_PLAN/PLAN_NAME]"
                   },
                   {
                     "id": "dim_plan__plan_key",
-                    "formula": "[DIM_PLAN/Plan Key]"
+                    "name": "Plan Key",
+                    "formula": "[DIM_PLAN/PLAN_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
-                ],
-                "uniqueKeys": [
-                  "dim_plan__plan_key"
                 ],
                 "order": [
                   "dim_plan__plan_name",
@@ -312,9 +322,10 @@
               {
                 "id": "dim_facility",
                 "kind": "table",
+                "name": "Dim Facility",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "ANALYTICS",
                     "CLAIMS",
@@ -324,15 +335,15 @@
                 "columns": [
                   {
                     "id": "dim_facility__facility_name",
-                    "formula": "[DIM_FACILITY/Facility Name]"
+                    "name": "Facility Name",
+                    "formula": "[DIM_FACILITY/FACILITY_NAME]"
                   },
                   {
                     "id": "dim_facility__facility_key",
-                    "formula": "[DIM_FACILITY/Facility Key]"
+                    "name": "Facility Key",
+                    "formula": "[DIM_FACILITY/FACILITY_KEY]",
+                    "description": "Relationship key. The semantic view names this column and does not declare it as a field."
                   }
-                ],
-                "uniqueKeys": [
-                  "dim_facility__facility_key"
                 ],
                 "order": [
                   "dim_facility__facility_name",
@@ -344,10 +355,20 @@
         ]
       },
       "findingCodes": [
-        "DERIVED_METRIC",
-        "EXPRESSION_NOT_REPRESENTABLE",
-        "COLUMN_TYPES_SKIPPED",
-        "MULTI_FACT_SHARED_DIMENSIONS"
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "HELPER_COLUMN",
+        "VIEW_METRIC"
       ]
     }
   ]

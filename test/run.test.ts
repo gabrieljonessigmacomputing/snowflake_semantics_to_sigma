@@ -11,7 +11,7 @@ import { FakeSigma } from './helpers/fake-sigma.js';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SALES = 'ANALYTICS.MODELS.SALES_VIEW';
 const TPCH = 'ANALYTICS.MODELS.TPCH_SALES';
-const RETAIL = 'ANALYTICS.MODELS.RETAIL_ANALYTICS_SV';
+const BROKEN = 'ANALYTICS.MODELS.BROKEN_VIEW';
 
 function repo(files: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), 'ssv-run-'));
@@ -104,18 +104,18 @@ test('deleted file reports orphan and never calls deleteFile', async () => {
 });
 
 test('refused view fails run but others deploy and lock records them', async () => {
-  const dir = repo({ ...STD, 'views/retail.sql': 'embed/RETAIL_ANALYTICS_SV.sql' });
+  const dir = repo({ ...STD, 'views/broken.sql': 'broken_view.sql' });
   const r = await run(config(), deps(dir, new FakeSigma()).d);
-  assert.deepEqual(statusOf(r), { [SALES]: 'created', [TPCH]: 'created', [RETAIL]: 'refused' });
+  assert.deepEqual(statusOf(r), { [SALES]: 'created', [TPCH]: 'created', [BROKEN]: 'refused' });
   assert.equal(r.exitCode, 1);
   assert.deepEqual(Object.keys(lockOf(dir).views).sort(), [SALES, TPCH]);
-  assert.ok(r.outcomes.find(o => o.key === RETAIL)!.findings.length > 0);
+  assert.ok(r.outcomes.find(o => o.key === BROKEN)!.findings.some(f => f.code === 'UNTRANSLATED'));
 });
 
 test('failOnRefused false exits 0 with refusals', async () => {
-  const dir = repo({ ...STD, 'views/retail.sql': 'embed/RETAIL_ANALYTICS_SV.sql' });
+  const dir = repo({ ...STD, 'views/broken.sql': 'broken_view.sql' });
   const r = await run(config({ failOnRefused: false }), deps(dir, new FakeSigma()).d);
-  assert.equal(statusOf(r)[RETAIL], 'refused');
+  assert.equal(statusOf(r)[BROKEN], 'refused');
   assert.equal(r.exitCode, 0);
 });
 
@@ -236,14 +236,14 @@ test('a tracked file that stops parsing is an error, not an orphan', async () =>
   assert.equal(r.exitCode, 1);
 });
 
-test('a USE preamble is refused with the engine findings', async () => {
+test('a USE preamble still converts', async () => {
   const dir = repo({});
   mkdirSync(join(dir, 'views'));
   writeFileSync(join(dir, 'views/sales.sql'), 'USE SCHEMA ANALYTICS.MODELS;\n' + readFileSync(join(ROOT, 'test/fixtures/star_schema_ddl.sql'), 'utf8'));
   const r = await run(config(), deps(dir, new FakeSigma()).d);
   const o = r.outcomes.find(x => x.key === SALES)!;
-  assert.equal(o.status, 'refused');
-  assert.ok(o.findings.some(f => f.code === 'MALFORMED_DDL'));
+  assert.equal(o.status, 'created');
+  assert.equal(o.findings.some(f => f.severity === 'error'), false);
 });
 
 test('state is refreshed before the lock is read, and not on dry runs', async () => {

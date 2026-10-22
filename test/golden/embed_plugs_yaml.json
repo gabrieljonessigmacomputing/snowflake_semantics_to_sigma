@@ -13,9 +13,9 @@
       "ok": true,
       "model": {
         "name": "PLUGS_SEMANTIC_VIEW",
+        "description": "Sigma data model for the Snowflake semantic view PLUGS_SEMANTIC_VIEW: 5 tables, 64 columns, 4 relationships. Semantic-view metrics are translated as written. Facts are columns.\n\nThis semantic view represents a comprehensive retail analytics system focused on electronics sales data. The central fact table (F_POINT_OF_SALE) is connected to a dimension table (D_PRODUCT) and a second fact table (F_SALES) through established relationships: products via PRODUCT_KEY, and sales transactions via ORDER_NUMBER. The sales transactions fact table (F_SALES) is turn connected to two additional dimension tables: customers via CUST_KEY, and stores via STORE_KEY. The relationships create a star schema design that enables multi-dimensional analysis of sales performance across customer demographics, product categories, store locations, and time periods. The view supports complex business intelligence queries combining transactional data with dimensional attributes for comprehensive retail analytics.\n\nGrain: D Customer: one row per CUST_KEY. D Product: one row per PRODUCT_KEY. D Store: one row per STORE_KEY. F Sales: one row per ORDER_NUMBER.\n\nMetrics are not pre-filtered. AI instructions are not stored on the model (Sigma has no API for that); they are in the AI context file.",
         "schemaVersion": 1,
         "kind": "data-model",
-        "description": "This semantic view represents a comprehensive retail analytics system focused on electronics sales data. The central fact table (F_POINT_OF_SALE) is connected to a dimension table (D_PRODUCT) and a second fact table (F_SALES) through established relationships: products via PRODUCT_KEY, and sales transactions via ORDER_NUMBER. The sales transactions fact table (F_SALES) is turn connected to two additional dimension tables: customers via CUST_KEY, and stores via STORE_KEY. The relationships create a star schema design that enables multi-dimensional analysis of sales performance across customer demographics, product categories, store locations, and time periods. The view supports complex business intelligence queries combining transactional data with dimensional attributes for comprehensive retail analytics.",
         "pages": [
           {
             "id": "page1",
@@ -24,9 +24,10 @@
               {
                 "id": "d_customer",
                 "kind": "table",
+                "name": "D Customer",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SE_DEMO_DB",
                     "PLUGS_ELECTRONICS",
@@ -36,95 +37,110 @@
                 "columns": [
                   {
                     "id": "d_customer__age_group",
-                    "formula": "[D_CUSTOMER/Age Group]",
+                    "name": "Age Group",
+                    "formula": "[D_CUSTOMER/AGE_GROUP]",
                     "description": "Customer age group (one of 18-35, 36-55, or 56+)"
                   },
                   {
                     "id": "d_customer__civil_status",
-                    "formula": "[D_CUSTOMER/Civil Status]",
+                    "name": "Civil Status",
+                    "formula": "[D_CUSTOMER/CIVIL_STATUS]",
                     "description": "Customer civil status (one of single, married, divorced, or widowed)"
                   },
                   {
                     "id": "d_customer__cust_address",
-                    "formula": "[D_CUSTOMER/Cust Address]",
+                    "name": "Cust Address",
+                    "formula": "[D_CUSTOMER/CUST_ADDRESS]",
                     "description": "Customer street address"
                   },
                   {
                     "id": "d_customer__cust_age",
-                    "formula": "[D_CUSTOMER/Cust Age]",
+                    "name": "Cust Age",
+                    "formula": "[D_CUSTOMER/CUST_AGE]",
                     "description": "Customer age"
                   },
                   {
                     "id": "d_customer__cust_city",
-                    "formula": "[D_CUSTOMER/Cust City]",
+                    "name": "Cust City",
+                    "formula": "[D_CUSTOMER/CUST_CITY]",
                     "description": "Customer city"
                   },
                   {
                     "id": "d_customer__cust_county",
-                    "formula": "[D_CUSTOMER/Cust County]",
+                    "name": "Cust County",
+                    "formula": "[D_CUSTOMER/CUST_COUNTY]",
                     "description": "Customer county"
                   },
                   {
                     "id": "d_customer__cust_gender",
-                    "formula": "[D_CUSTOMER/Cust Gender]",
+                    "name": "Cust Gender",
+                    "formula": "[D_CUSTOMER/CUST_GENDER]",
                     "description": "Customer gender"
                   },
                   {
                     "id": "d_customer__cust_json_field",
-                    "formula": "[D_CUSTOMER/Cust Json Field]",
+                    "name": "Cust Json Field",
+                    "formula": "[D_CUSTOMER/CUST_JSON_FIELD]",
                     "description": "JSON field containing customer details"
                   },
                   {
                     "id": "d_customer__cust_key",
-                    "formula": "[D_CUSTOMER/Cust Key]",
+                    "name": "Cust Key",
+                    "formula": "[D_CUSTOMER/CUST_KEY]",
                     "description": "Unique number associated with a customer"
                   },
                   {
                     "id": "d_customer__cust_name",
-                    "formula": "[D_CUSTOMER/Cust Name]",
+                    "name": "Cust Name",
+                    "formula": "[D_CUSTOMER/CUST_NAME]",
                     "description": "Customer name"
                   },
                   {
                     "id": "d_customer__cust_region",
-                    "formula": "[D_CUSTOMER/Cust Region]",
+                    "name": "Cust Region",
+                    "formula": "[D_CUSTOMER/CUST_REGION]",
                     "description": "Customer region"
                   },
                   {
                     "id": "d_customer__cust_state",
-                    "formula": "[D_CUSTOMER/Cust State]",
+                    "name": "Cust State",
+                    "formula": "[D_CUSTOMER/CUST_STATE]",
                     "description": "Customer state"
                   },
                   {
                     "id": "d_customer__cust_type",
-                    "formula": "[D_CUSTOMER/Cust Type]",
+                    "name": "Cust Type",
+                    "formula": "[D_CUSTOMER/CUST_TYPE]",
                     "description": "Customer type (either individual or company)"
                   },
                   {
                     "id": "d_customer__cust_zip_code",
-                    "formula": "[D_CUSTOMER/Cust Zip Code]",
+                    "name": "Cust Zip Code",
+                    "formula": "[D_CUSTOMER/CUST_ZIP_CODE]",
                     "description": "Customer zip code"
                   },
                   {
                     "id": "d_customer__loyalty_program",
-                    "formula": "[D_CUSTOMER/Loyalty Program]",
+                    "name": "Loyalty Program",
+                    "formula": "[D_CUSTOMER/LOYALTY_PROGRAM]",
                     "description": "Boolean column denoting whether the customer is a store loyalty program member (1) or not (0)"
                   },
                   {
                     "id": "d_customer__updated_by",
-                    "formula": "[D_CUSTOMER/Updated By]"
+                    "name": "Updated by",
+                    "formula": "[D_CUSTOMER/UPDATED_BY]"
                   },
                   {
                     "id": "d_customer__cust_since",
-                    "formula": "[D_CUSTOMER/Cust Since]",
+                    "name": "Cust Since",
+                    "formula": "[D_CUSTOMER/CUST_SINCE]",
                     "description": "Date the customer first made a purchase"
                   },
                   {
                     "id": "d_customer__updated_at",
-                    "formula": "[D_CUSTOMER/Updated At]"
+                    "name": "Updated At",
+                    "formula": "[D_CUSTOMER/UPDATED_AT]"
                   }
-                ],
-                "uniqueKeys": [
-                  "d_customer__cust_key"
                 ],
                 "order": [
                   "d_customer__age_group",
@@ -150,9 +166,10 @@
               {
                 "id": "d_product",
                 "kind": "table",
+                "name": "D Product",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SE_DEMO_DB",
                     "PLUGS_ELECTRONICS",
@@ -162,72 +179,83 @@
                 "columns": [
                   {
                     "id": "d_product__price",
-                    "formula": "[D_PRODUCT/Price]",
+                    "name": "Price",
+                    "formula": "[D_PRODUCT/PRICE]",
                     "description": "Unit price for a product"
                   },
                   {
                     "id": "d_product__product_description",
-                    "formula": "[D_PRODUCT/Product Description]",
+                    "name": "Product Description",
+                    "formula": "[D_PRODUCT/PRODUCT_DESCRIPTION]",
                     "description": "Product description"
                   },
                   {
                     "id": "d_product__product_family",
-                    "formula": "[D_PRODUCT/Product Family]",
+                    "name": "Product Family",
+                    "formula": "[D_PRODUCT/PRODUCT_FAMILY]",
                     "description": "Product family"
                   },
                   {
                     "id": "d_product__product_group",
-                    "formula": "[D_PRODUCT/Product Group]",
+                    "name": "Product Group",
+                    "formula": "[D_PRODUCT/PRODUCT_GROUP]",
                     "description": "Product group"
                   },
                   {
                     "id": "d_product__product_key",
-                    "formula": "[D_PRODUCT/Product Key]",
+                    "name": "Product Key",
+                    "formula": "[D_PRODUCT/PRODUCT_KEY]",
                     "description": "Unique number associated with a product"
                   },
                   {
                     "id": "d_product__product_line",
-                    "formula": "[D_PRODUCT/Product Line]",
+                    "name": "Product Line",
+                    "formula": "[D_PRODUCT/PRODUCT_LINE]",
                     "description": "Product line"
                   },
                   {
                     "id": "d_product__product_name",
-                    "formula": "[D_PRODUCT/Product Name]",
+                    "name": "Product Name",
+                    "formula": "[D_PRODUCT/PRODUCT_NAME]",
                     "description": "Product name"
                   },
                   {
                     "id": "d_product__product_notes",
-                    "formula": "[D_PRODUCT/Product Notes]"
+                    "name": "Product Notes",
+                    "formula": "[D_PRODUCT/PRODUCT_NOTES]"
                   },
                   {
                     "id": "d_product__product_status",
-                    "formula": "[D_PRODUCT/Product Status]"
+                    "name": "Product Status",
+                    "formula": "[D_PRODUCT/PRODUCT_STATUS]"
                   },
                   {
                     "id": "d_product__product_type",
-                    "formula": "[D_PRODUCT/Product Type]",
+                    "name": "Product Type",
+                    "formula": "[D_PRODUCT/PRODUCT_TYPE]",
                     "description": "Product type"
                   },
                   {
                     "id": "d_product__proposed_price",
-                    "formula": "[D_PRODUCT/Proposed Price]"
+                    "name": "Proposed Price",
+                    "formula": "[D_PRODUCT/PROPOSED_PRICE]"
                   },
                   {
                     "id": "d_product__sku_number",
-                    "formula": "[D_PRODUCT/Sku Number]",
+                    "name": "Sku Number",
+                    "formula": "[D_PRODUCT/SKU_NUMBER]",
                     "description": "Unique alphanumeric stock keeping unit code that identifies a product and helps track inventory"
                   },
                   {
                     "id": "d_product__updated_by",
-                    "formula": "[D_PRODUCT/Updated By]"
+                    "name": "Updated by",
+                    "formula": "[D_PRODUCT/UPDATED_BY]"
                   },
                   {
                     "id": "d_product__updated_at",
-                    "formula": "[D_PRODUCT/Updated At]"
+                    "name": "Updated At",
+                    "formula": "[D_PRODUCT/UPDATED_AT]"
                   }
-                ],
-                "uniqueKeys": [
-                  "d_product__product_key"
                 ],
                 "order": [
                   "d_product__price",
@@ -249,9 +277,10 @@
               {
                 "id": "d_store",
                 "kind": "table",
+                "name": "D Store",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SE_DEMO_DB",
                     "PLUGS_ELECTRONICS",
@@ -261,102 +290,118 @@
                 "columns": [
                   {
                     "id": "d_store__latitude",
-                    "formula": "[D_STORE/Latitude]",
+                    "name": "Latitude",
+                    "formula": "[D_STORE/LATITUDE]",
                     "description": "Store latitude"
                   },
                   {
                     "id": "d_store__longitude",
-                    "formula": "[D_STORE/Longitude]",
+                    "name": "Longitude",
+                    "formula": "[D_STORE/LONGITUDE]",
                     "description": "Store longitude"
                   },
                   {
                     "id": "d_store__monthly_rent_cost",
-                    "formula": "[D_STORE/Monthly Rent Cost]",
+                    "name": "Monthly Rent Cost",
+                    "formula": "[D_STORE/MONTHLY_RENT_COST]",
                     "description": "Monthly rent cost in USD"
                   },
                   {
                     "id": "d_store__number_of_employees",
-                    "formula": "[D_STORE/Number Of Employees]",
+                    "name": "Number of Employees",
+                    "formula": "[D_STORE/NUMBER_OF_EMPLOYEES]",
                     "description": "Number of store employees"
                   },
                   {
                     "id": "d_store__online_ordering",
-                    "formula": "[D_STORE/Online Ordering]",
+                    "name": "Online Ordering",
+                    "formula": "[D_STORE/ONLINE_ORDERING]",
                     "description": "Type of online ordering available"
                   },
                   {
                     "id": "d_store__selling_square_footage",
-                    "formula": "[D_STORE/Selling Square Footage]",
+                    "name": "Selling Square Footage",
+                    "formula": "[D_STORE/SELLING_SQUARE_FOOTAGE]",
                     "description": "Square footage allocated for selling space"
                   },
                   {
                     "id": "d_store__store_address",
-                    "formula": "[D_STORE/Store Address]",
+                    "name": "Store Address",
+                    "formula": "[D_STORE/STORE_ADDRESS]",
                     "description": "Store street address"
                   },
                   {
                     "id": "d_store__store_city",
-                    "formula": "[D_STORE/Store City]",
+                    "name": "Store City",
+                    "formula": "[D_STORE/STORE_CITY]",
                     "description": "Store city"
                   },
                   {
                     "id": "d_store__store_county",
-                    "formula": "[D_STORE/Store County]",
+                    "name": "Store County",
+                    "formula": "[D_STORE/STORE_COUNTY]",
                     "description": "Store county"
                   },
                   {
                     "id": "d_store__store_json_field",
-                    "formula": "[D_STORE/Store Json Field]",
+                    "name": "Store Json Field",
+                    "formula": "[D_STORE/STORE_JSON_FIELD]",
                     "description": "JSON field containing store details"
                   },
                   {
                     "id": "d_store__store_key",
-                    "formula": "[D_STORE/Store Key]",
+                    "name": "Store Key",
+                    "formula": "[D_STORE/STORE_KEY]",
                     "description": "Unique number associated with a store"
                   },
                   {
                     "id": "d_store__store_name",
-                    "formula": "[D_STORE/Store Name]",
+                    "name": "Store Name",
+                    "formula": "[D_STORE/STORE_NAME]",
                     "description": "Store name"
                   },
                   {
                     "id": "d_store__store_region",
-                    "formula": "[D_STORE/Store Region]",
+                    "name": "Store Region",
+                    "formula": "[D_STORE/STORE_REGION]",
                     "description": "Store region"
                   },
                   {
                     "id": "d_store__store_size",
-                    "formula": "[D_STORE/Store Size]",
+                    "name": "Store Size",
+                    "formula": "[D_STORE/STORE_SIZE]",
                     "description": "Store size (one of small, medium, or large)"
                   },
                   {
                     "id": "d_store__store_state",
-                    "formula": "[D_STORE/Store State]",
+                    "name": "Store State",
+                    "formula": "[D_STORE/STORE_STATE]",
                     "description": "Store state"
                   },
                   {
                     "id": "d_store__store_zip_code",
-                    "formula": "[D_STORE/Store Zip Code]",
+                    "name": "Store Zip Code",
+                    "formula": "[D_STORE/STORE_ZIP_CODE]",
                     "description": "Store zip code"
                   },
                   {
                     "id": "d_store__total_square_footage",
-                    "formula": "[D_STORE/Total Square Footage]",
+                    "name": "Total Square Footage",
+                    "formula": "[D_STORE/TOTAL_SQUARE_FOOTAGE]",
                     "description": "Total store square footage"
                   },
                   {
                     "id": "d_store__last_layout_update",
-                    "formula": "[D_STORE/Last Layout Update]",
+                    "name": "Last Layout Update",
+                    "formula": "[D_STORE/LAST_LAYOUT_UPDATE]",
                     "description": "Date the store layout was last updated"
                   },
                   {
                     "id": "d_store__store_open_date",
-                    "formula": "[D_STORE/Store Open Date]",
+                    "name": "Store Open Date",
+                    "formula": "[D_STORE/STORE_OPEN_DATE]",
                     "description": "Date the store first opened for business"
                   }
-                ],
-                "uniqueKeys": [
-                  "d_store__store_key"
                 ],
                 "order": [
                   "d_store__latitude",
@@ -383,9 +428,10 @@
               {
                 "id": "f_point_of_sale",
                 "kind": "table",
+                "name": "F Point of Sale",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SE_DEMO_DB",
                     "PLUGS_ELECTRONICS",
@@ -395,67 +441,71 @@
                 "columns": [
                   {
                     "id": "f_point_of_sale__order_cost",
-                    "formula": "[Sales Quantity] * [Unit Cost]",
-                    "name": "Order Cost",
-                    "description": "The total cost of the order, including all items, taxes, and fees, at the point of sale. Also known as: order_disbursement, order_expenditure, order_expense, order_outlay, order_spend"
+                    "name": "Order_disbursement",
+                    "formula": "[Sales Quantity] * [Cost_per_item]",
+                    "description": "The total cost of the order, including all items, taxes, and fees, at the point of sale. Also called: order_disbursement, order_expenditure, order_expense, order_outlay, order_spend."
                   },
                   {
                     "id": "f_point_of_sale__order_number",
-                    "formula": "[F_POINT_OF_SALE/Order Number]",
+                    "name": "Order Number",
+                    "formula": "[F_POINT_OF_SALE/ORDER_NUMBER]",
                     "description": "Unique number associated with an order"
                   },
                   {
                     "id": "f_point_of_sale__order_revenue",
-                    "formula": "[Sales Quantity] * [Unit Price]",
-                    "name": "Order Revenue",
-                    "description": "The total revenue generated by an order at the point of sale. Also known as: order_amount, order_sales, order_total, sales_revenue, total_order_value"
+                    "name": "Order_amount",
+                    "formula": "[Sales Quantity] * [Item_price]",
+                    "description": "The total revenue generated by an order at the point of sale. Also called: order_amount, order_sales, order_total, sales_revenue, total_order_value."
                   },
                   {
                     "id": "f_point_of_sale__product_key",
-                    "formula": "[F_POINT_OF_SALE/Product Key]",
+                    "name": "Product Key",
+                    "formula": "[F_POINT_OF_SALE/PRODUCT_KEY]",
                     "description": "Unique number associated with a product"
                   },
                   {
                     "id": "f_point_of_sale__sales_quantity",
-                    "formula": "[F_POINT_OF_SALE/Sales Quantity]",
+                    "name": "Sales Quantity",
+                    "formula": "[F_POINT_OF_SALE/SALES_QUANTITY]",
                     "description": "Quantity of products ordered"
                   },
                   {
                     "id": "f_point_of_sale__cost_amount",
-                    "formula": "[F_POINT_OF_SALE/Cost Amount]",
-                    "name": "Unit Cost",
-                    "description": "The cost of a single unit of an item at the point of sale, typically representing the cost at which the item was purchased from a supplier. Also known as: cost_per_item, cost_per_unit, item_cost"
+                    "name": "Cost_per_item",
+                    "formula": "[F_POINT_OF_SALE/COST_AMOUNT]",
+                    "description": "The cost of a single unit of an item at the point of sale, typically representing the cost at which the item was purchased from a supplier. Also called: cost_per_item, cost_per_unit, item_cost."
                   },
                   {
                     "id": "f_point_of_sale__sales_amount",
-                    "formula": "[F_POINT_OF_SALE/Sales Amount]",
-                    "name": "Unit Price",
-                    "description": "The sales price of a single unit of a product or service at the point of sale. This represents the price at which the product was sold to a customer. Also known as: item_price, price_per_item, price_per_unit"
+                    "name": "Item_price",
+                    "formula": "[F_POINT_OF_SALE/SALES_AMOUNT]",
+                    "description": "The sales price of a single unit of a product or service at the point of sale. This represents the price at which the product was sold to a customer. Also called: item_price, price_per_item, price_per_unit."
                   }
                 ],
                 "metrics": [
                   {
                     "id": "f_point_of_sale__m__profit",
-                    "formula": "Sum([Sales Quantity] * ([Unit Price] - [Unit Cost]))",
                     "name": "Profit",
-                    "description": "The profit made from a sale, calculated as the difference between the sale amount and the cost of the item or service sold. Also known as: earnings, gain, income, net_earnings, revenue"
+                    "formula": "Sum([Sales Quantity] * ([Item_price] - [Cost_per_item]))",
+                    "description": "The profit made from a sale, calculated as the difference between the sale amount and the cost of the item or service sold. Semantic view definition: SUM(SALES_QUANTITY*(SALES_AMOUNT-COST_AMOUNT)) Also called: earnings, gain, income, net_earnings, revenue."
                   },
                   {
                     "id": "f_point_of_sale__m__profit_margin",
-                    "formula": "100 * (Sum([Sales Quantity] * ([Unit Price] - [Unit Cost])) / Sum([Sales Quantity] * [Unit Price]))",
                     "name": "Profit Margin",
-                    "description": "The percentage of revenue that is profit, calculated by dividing the profit by the revenue and multiplying by 100, indicating the amount of money a company retains from each dollar of sales after accounting for the cost of goods sold. Also known as: gross_profit_percentage, margin_rate, net_profit_percentage, profit_percentage, return_on_sales"
+                    "formula": "100 * (Sum([Sales Quantity] * ([Item_price] - [Cost_per_item])) / Sum([Sales Quantity] * [Item_price]))",
+                    "description": "The percentage of revenue that is profit, calculated by dividing the profit by the revenue and multiplying by 100, indicating the amount of money a company retains from each dollar of sales after accounting for the cost of goods sold. Semantic view definition: 100*(SUM(SALES_QUANTITY*(SALES_AMOUNT-COST_AMOUNT))/sum(SALES_QUANTITY*SALES_AMOUNT)) Also called: gross_profit_percentage, margin_rate, net_profit_percentage, profit_percentage, return_on_sales."
                   },
                   {
                     "id": "f_point_of_sale__m__revenue",
-                    "formula": "Sum([Sales Quantity] * [Unit Price])",
                     "name": "Revenue",
-                    "description": "The total amount of money earned from sales. Also known as: earnings, income, revenue_generated, sales_revenue, total_revenue, total_sales"
+                    "formula": "Sum([Sales Quantity] * [Item_price])",
+                    "description": "The total amount of money earned from sales. Semantic view definition: SUM(SALES_QUANTITY*SALES_AMOUNT) Also called: earnings, income, revenue_generated, sales_revenue, total_revenue, total_sales."
                   }
                 ],
                 "relationships": [
                   {
                     "id": "f_point_of_sale__to__d_product",
+                    "name": "Point of Sale to Product",
                     "targetElementId": "d_product",
                     "keys": [
                       {
@@ -463,11 +513,11 @@
                         "targetColumnId": "d_product__product_key"
                       }
                     ],
-                    "name": "Point Of Sale To Product",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "f_point_of_sale__to__f_sales",
+                    "name": "Point of Sale to Sales",
                     "targetElementId": "f_sales",
                     "keys": [
                       {
@@ -475,7 +525,6 @@
                         "targetColumnId": "f_sales__order_number"
                       }
                     ],
-                    "name": "Point Of Sale To Sales",
                     "relationshipType": "N:1"
                   }
                 ],
@@ -492,9 +541,10 @@
               {
                 "id": "f_sales",
                 "kind": "table",
+                "name": "F Sales",
                 "source": {
-                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "kind": "warehouse-table",
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
                   "path": [
                     "SE_DEMO_DB",
                     "PLUGS_ELECTRONICS",
@@ -504,38 +554,45 @@
                 "columns": [
                   {
                     "id": "f_sales__cust_key",
-                    "formula": "[F_SALES/Cust Key]",
+                    "name": "Cust Key",
+                    "formula": "[F_SALES/CUST_KEY]",
                     "description": "Unique number associated with a customer"
                   },
                   {
                     "id": "f_sales__order_number",
-                    "formula": "[F_SALES/Order Number]",
+                    "name": "Order Number",
+                    "formula": "[F_SALES/ORDER_NUMBER]",
                     "description": "Unique number associated with an order"
                   },
                   {
                     "id": "f_sales__purchase_method",
-                    "formula": "[F_SALES/Purchase Method]",
+                    "name": "Purchase Method",
+                    "formula": "[F_SALES/PURCHASE_METHOD]",
                     "description": "Purchase method (one of cash, credit, or debit)"
                   },
                   {
                     "id": "f_sales__store_key",
-                    "formula": "[F_SALES/Store Key]",
+                    "name": "Store Key",
+                    "formula": "[F_SALES/STORE_KEY]",
                     "description": "Unique number associated with a store"
                   },
                   {
                     "id": "f_sales__transaction_type",
-                    "formula": "[F_SALES/Transaction Type]",
+                    "name": "Transaction Type",
+                    "formula": "[F_SALES/TRANSACTION_TYPE]",
                     "description": "Type of transaction (either purchase or refund)"
                   },
                   {
                     "id": "f_sales__date",
-                    "formula": "[F_SALES/Date]",
+                    "name": "Date",
+                    "formula": "[F_SALES/DATE]",
                     "description": "Order date"
                   }
                 ],
                 "relationships": [
                   {
                     "id": "f_sales__to__d_customer",
+                    "name": "Sales to Customer",
                     "targetElementId": "d_customer",
                     "keys": [
                       {
@@ -543,11 +600,11 @@
                         "targetColumnId": "d_customer__cust_key"
                       }
                     ],
-                    "name": "Sales To Customer",
                     "relationshipType": "N:1"
                   },
                   {
                     "id": "f_sales__to__d_store",
+                    "name": "Sales to Store",
                     "targetElementId": "d_store",
                     "keys": [
                       {
@@ -555,12 +612,8 @@
                         "targetColumnId": "d_store__store_key"
                       }
                     ],
-                    "name": "Sales To Store",
                     "relationshipType": "N:1"
                   }
-                ],
-                "uniqueKeys": [
-                  "f_sales__order_number"
                 ],
                 "order": [
                   "f_sales__cust_key",
@@ -575,9 +628,7 @@
           }
         ]
       },
-      "findingCodes": [
-        "COLUMN_TYPES_SKIPPED"
-      ]
+      "findingCodes": []
     }
   ]
 }

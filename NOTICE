@@ -1,5 +1,11 @@
 snowflake_semantics_to_sigma
 Copyright 2026 Sigma Computing
 
-This product bundles semantic-tools (https://github.com/sigmacomputing/semantic-tools),
-licensed under Apache-2.0. See vendor/semantic-tools/NOTICE and vendor/semantic-tools/LICENSE.
+Conversion uses the semantic-view converter (physical column names, real relationship
+keys, and semi-additive latest/earliest formulas), Apache-2.0, pinned in src/convert.ts
+as semantic-view-converter@4860ebc. The converter reads no credentials.
+
+This repository also contains a copy of semantic-tools
+(https://github.com/sigmacomputing/semantic-tools), licensed under Apache-2.0.
+See vendor/semantic-tools/NOTICE and vendor/semantic-tools/LICENSE. The action
+no longer calls that bundle.

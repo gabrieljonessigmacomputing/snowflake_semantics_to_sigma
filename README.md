@@ -11,15 +11,23 @@ It is the Snowflake counterpart of
 
 ## The conversion contract
 
-Conversion uses the [semantic-tools](https://github.com/sigmacomputing/semantic-tools)
-engine (vendored, pinned; see [Engine](#engine)). It follows one rule: **every
-object it emits means exactly what the source meant, or it is not emitted.**
+Conversion uses the semantic-view converter in [`converter/`](converter)
+(pinned as `semantic-view-converter@4860ebc`; see [Engine](#engine)). It does
+not call Sigma or Snowflake, and it does not read credentials.
 
-If a view contains something Sigma would answer differently, the view is
-**refused** and never deployed half-right. Examples: a semi-additive metric, an
-ASOF or range join, a metric pinned to a join path with `USING`. The job summary
-lists each finding with a remediation. `best_effort: true` converts such views
-anyway and reports the differences.
+- Column formulas use the physical warehouse name (`[LINEITEM/L_QUANTITY]`).
+- Relationships point at the real key column.
+- `NON ADDITIVE BY (date asc)` becomes `Sum(If([As of Date] = Max([As of Date]), [Measure]))`. `desc` uses `Min`.
+- `CURRENT_TIMESTAMP()` becomes `Now()`. `DATEDIFF` becomes `DateDiff`. `IS NULL` / `IS NOT NULL` become `IsNull` / `IsNotNull`.
+- A metric pinned with `USING` is translated and reported. Sigma has no join-path selector.
+- Metrics come from the semantic view. Facts stay columns.
+- Table synonyms go in the description (`Also called:`), not the element name.
+- AI instructions and verified questions are reported in the job summary. Sigma's API cannot store them on the model.
+
+A view is **refused**, and never deployed, when the source cannot be parsed, a
+table path is missing its database or schema, or an expression cannot be
+translated. `best_effort` is accepted so existing workflows keep parsing. It
+does not change the spec. The job summary lists each finding.
 
 After each deploy the action reads the data model's columns back. If any column
 did not resolve (type `error`), or the check could not run, it treats the deploy
@@ -53,7 +61,7 @@ Only genuinely new objects get new IDs.
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: twells89/snowflake_semantics_to_sigma@v1
+- uses: gabrieljonessigmacomputing/snowflake_semantics_to_sigma@v1
   with:
     sigma_base_url: ${{ vars.SIGMA_BASE_URL }}
     sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
@@ -81,14 +89,14 @@ to guarantee the code you reviewed is the code that runs. Keep the version in a
 comment so people can tell what's pinned:
 
 ```yaml
-- uses: twells89/snowflake_semantics_to_sigma@<full-40-character-sha> # v1.0.0
+- uses: gabrieljonessigmacomputing/snowflake_semantics_to_sigma@<full-40-character-sha> # v1.0.0
 ```
 
 Look up a release's commit SHA on the
-[releases page](https://github.com/twells89/snowflake_semantics_to_sigma/releases), or with:
+[releases page](https://github.com/gabrieljonessigmacomputing/snowflake_semantics_to_sigma/releases), or with:
 
 ```bash
-gh api repos/twells89/snowflake_semantics_to_sigma/commits/v1.0.0 -q .sha
+gh api repos/gabrieljonessigmacomputing/snowflake_semantics_to_sigma/commits/v1.0.0 -q .sha
 ```
 
 To keep a SHA pin current, let Dependabot propose updates. It rewrites the SHA
@@ -120,14 +128,14 @@ you enable them.
 | `database` / `schema` | — | The views' database/schema (YAML has no qualifier), and the default for table references with fewer than 3 / 2 parts. |
 | `mode` | `auto` (`all` on `workflow_dispatch`) | `auto`: views whose file, engine version or options changed. `all`: every view. |
 | `dry_run` | `true` on pull requests | Convert and report only. Writes nothing to Sigma or the repo. |
-| `best_effort` | `false` | Convert constructs that would otherwise be refused. |
+| `best_effort` | `false` | Accepted for existing workflows. Semi-additive metrics and `USING` pins are already translated, so this flag does not change the spec. |
 | `fail_on_refused` | `true` | Fail the run when any view is refused. |
 | `lock_file` | `sigma/semantic-views.lock.json` | The state file. |
 | `save_specs` / `specs_dir` | `true` / `sigma/models` | Save the spec Sigma returns for each deployed model (reviewable diffs). |
 | `commit_mode` | `push` | `push`, `pull_request` (bot PR, for protected branches) or `none`. |
 | `adopt_existing` | `false` | Take over a same-named model the lockfile doesn't track. |
 | `model_name_template` | `{view}` | Sigma model name. Placeholders `{database}`, `{schema}`, `{view}`. |
-| `column_types_file` | — | JSON `{ "DB.SCHEMA.TABLE": { "COLUMN": "TYPE" } }` for the engine's time-zone checks. |
+| `column_types_file` | — | JSON `{ "DB.SCHEMA.TABLE": { "COLUMN": "TYPE" } }` used to spell physical columns and infer number formats. |
 | `git_user_name` / `git_user_email` | `github-actions[bot]` | Author of state commits. |
 | `github_token` | `${{ github.token }}` | Used by `commit_mode: pull_request`. |
 
@@ -185,18 +193,16 @@ Each is a JSON array of view keys.
 
 ## Engine
 
-`vendor/semantic-tools/` is a byte-for-byte copy of the bundle built from
-`sigmacomputing/semantic-tools` at the commit in `semantic-tools-embed/PIN`
-(see `PROVENANCE.json`). It is the same bundle and adapter that
-[`sigma-data-model-mcp`](https://github.com/twells89/sigma-data-model-mcp) ships.
+`converter/` is the semantic-view converter. `src/convert.ts` calls it with
+`python3` (already on GitHub-hosted runners) and passes the connection id on
+stdin. The lockfile records `semantic-view-converter@4860ebc`, so the first run
+of this action reconverts every view.
 
-To bump it, you need read access to semantic-tools:
+`vendor/semantic-tools/` remains in the tree under its Apache-2.0 license. The
+action does not call it.
 
 ```bash
-echo <new-commit> > semantic-tools-embed/PIN
-npm run build:semantic-tools     # clones into .cache/, rebuilds vendor/
-npm run check:semantic-tools     # upstream goldens + provenance gates
-npm test && npm run build        # commit vendor/ and dist/
+npm test && npm run build        # commit converter/ and dist/
 ```
 
 ## Development
@@ -208,8 +214,8 @@ npm run typecheck
 npm run build       # dist/index.js — commit it; CI fails on a stale dist/
 ```
 
-`test/golden/` holds the MCP converter's output for every fixture. It is
-regenerated with `node scripts/make-goldens.mjs <built sigma-data-model-mcp checkout>`.
+`test/golden/` locks this converter's output for every fixture. Regenerate it
+with `node --import tsx/esm scripts/refresh-goldens.mjs`.
 The `e2e` workflow runs against a real Sigma org on demand and weekly. It is not
 a required check. Without Sigma secrets it skips itself, as it does on forks
 and on this public repo.
