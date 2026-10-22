@@ -53,7 +53,7 @@ Only genuinely new objects get new IDs.
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: sigmacomputing/snowflake_semantics_to_sigma@v1
+- uses: twells89/snowflake_semantics_to_sigma@v1
   with:
     sigma_base_url: ${{ vars.SIGMA_BASE_URL }}
     sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
@@ -67,6 +67,46 @@ Only genuinely new objects get new IDs.
 
 The job needs `permissions: contents: write` to commit the lockfile. Use the
 `concurrency` group from the example so two syncs never race.
+
+## Versions and pinning
+
+| Reference | What you get |
+|---|---|
+| `@v1` | The latest 1.x release. The `v1` tag moves forward with each release, and nothing within v1 breaks your workflow. |
+| `@v1.0.0` | That exact release. |
+| `@<full commit SHA>` | Exactly that code, and nothing can change it. **Recommended for security-conscious teams.** |
+
+A tag can be moved and a commit SHA can't, so pinning to a SHA is the only way
+to guarantee the code you reviewed is the code that runs. Keep the version in a
+comment so people can tell what's pinned:
+
+```yaml
+- uses: twells89/snowflake_semantics_to_sigma@<full-40-character-sha> # v1.0.0
+```
+
+Look up a release's commit SHA on the
+[releases page](https://github.com/twells89/snowflake_semantics_to_sigma/releases), or with:
+
+```bash
+gh api repos/twells89/snowflake_semantics_to_sigma/commits/v1.0.0 -q .sha
+```
+
+To keep a SHA pin current, let Dependabot propose updates. It rewrites the SHA
+and the version comment together:
+
+```yaml
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+```
+
+There's no need to fork this repo to control updates: a SHA pin does that.
+Forks don't inherit any secrets, and their scheduled workflows stay off until
+you enable them.
 
 ## Inputs
 
@@ -171,7 +211,25 @@ npm run build       # dist/index.js — commit it; CI fails on a stale dist/
 `test/golden/` holds the MCP converter's output for every fixture. It is
 regenerated with `node scripts/make-goldens.mjs <built sigma-data-model-mcp checkout>`.
 The `e2e` workflow runs against a real Sigma org on demand and weekly. It is not
-a required check.
+a required check. Without Sigma secrets it skips itself, as it does on forks
+and on this public repo.
+
+### Releasing
+
+Versions follow [semver](https://semver.org). The major tag (`v1`) always points
+at the latest release with that major version.
+
+```bash
+# on main, with package.json "version" bumped and dist/ rebuilt and merged
+git tag -a v1.2.3 -m "v1.2.3"
+git tag -f v1 v1.2.3
+git push origin v1.2.3
+git push -f origin v1
+gh release create v1.2.3 --title v1.2.3 --notes "..."
+```
+
+A breaking change, such as a renamed or removed input or a lockfile change that
+existing repos can't read, gets a new major version (`v2`). `v1` stays where it was.
 
 ## License
 
