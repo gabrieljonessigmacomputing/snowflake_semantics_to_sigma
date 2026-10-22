@@ -1,0 +1,5 @@
+snowflake_semantics_to_sigma
+Copyright 2026 Sigma Computing
+
+This product bundles semantic-tools (https://github.com/sigmacomputing/semantic-tools),
+licensed under Apache-2.0. See vendor/semantic-tools/NOTICE and vendor/semantic-tools/LICENSE.

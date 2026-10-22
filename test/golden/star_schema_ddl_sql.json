@@ -1,0 +1,249 @@
+{
+  "fixture": "test/fixtures/star_schema_ddl.sql",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS"
+  },
+  "refused": false,
+  "refusedViews": [],
+  "results": [
+    {
+      "viewName": "SALES_VIEW",
+      "ok": true,
+      "model": {
+        "name": "SALES_VIEW",
+        "schemaVersion": 1,
+        "kind": "data-model",
+        "description": "Sales star schema (lineitem, orders, customer)",
+        "pages": [
+          {
+            "id": "page1",
+            "name": "Page 1",
+            "elements": [
+              {
+                "id": "lineitem",
+                "kind": "table",
+                "description": "Order lines, one row per part shipped",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "LINEITEM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "lineitem__l_quantity",
+                    "formula": "[LINEITEM/L Quantity]"
+                  },
+                  {
+                    "id": "lineitem__l_orderkey",
+                    "formula": "[LINEITEM/L Orderkey]"
+                  },
+                  {
+                    "id": "lineitem__l_extendedprice",
+                    "formula": "[LINEITEM/L Extendedprice]"
+                  },
+                  {
+                    "id": "lineitem__l_discount",
+                    "formula": "[LINEITEM/L Discount]"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "lineitem__m__total_revenue",
+                    "formula": "Sum([L Extendedprice] * (1 - [L Discount]))",
+                    "name": "Total Revenue",
+                    "description": "Revenue net of discount"
+                  },
+                  {
+                    "id": "lineitem__m__average_quantity",
+                    "formula": "Avg([L Quantity])",
+                    "name": "Average Quantity"
+                  },
+                  {
+                    "id": "lineitem__m__distinct_orders",
+                    "formula": "CountDistinct([L Orderkey])",
+                    "name": "Distinct Orders"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "lineitem__to__orders",
+                    "targetElementId": "orders__joined",
+                    "keys": [
+                      {
+                        "sourceColumnId": "lineitem__l_orderkey",
+                        "targetColumnId": "orders__o_orderkey"
+                      }
+                    ],
+                    "name": "Lines To Orders",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "order": [
+                  "lineitem__l_quantity",
+                  "lineitem__l_orderkey",
+                  "lineitem__l_extendedprice",
+                  "lineitem__l_discount"
+                ]
+              },
+              {
+                "id": "orders",
+                "kind": "table",
+                "description": "One row per order. Also known as: sales orders, purchase orders",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "ORDERS"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "orders__o_orderstatus",
+                    "formula": "[ORDERS/O Orderstatus]",
+                    "description": "Also known as: status"
+                  },
+                  {
+                    "id": "orders__order_month",
+                    "formula": "DateTrunc(\"month\", [O Orderdate])",
+                    "name": "Order Month"
+                  },
+                  {
+                    "id": "orders__o_orderkey",
+                    "formula": "[ORDERS/O Orderkey]"
+                  },
+                  {
+                    "id": "orders__o_custkey",
+                    "formula": "[ORDERS/O Custkey]"
+                  },
+                  {
+                    "id": "orders__o_orderdate",
+                    "formula": "[ORDERS/O Orderdate]"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "orders__to__customer",
+                    "targetElementId": "customer",
+                    "keys": [
+                      {
+                        "sourceColumnId": "orders__o_custkey",
+                        "targetColumnId": "customer__c_custkey"
+                      }
+                    ],
+                    "name": "Orders To Customer",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "orders__o_orderkey"
+                ],
+                "order": [
+                  "orders__o_orderstatus",
+                  "orders__order_month",
+                  "orders__o_orderkey",
+                  "orders__o_custkey",
+                  "orders__o_orderdate"
+                ]
+              },
+              {
+                "id": "orders__joined",
+                "kind": "table",
+                "name": "ORDERS (joined)",
+                "description": "One row per order. Also known as: sales orders, purchase orders. Includes columns from related tables: Customer Name.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "orders"
+                },
+                "columns": [
+                  {
+                    "id": "orders__o_orderstatus",
+                    "formula": "[ORDERS/O Orderstatus]",
+                    "description": "Also known as: status"
+                  },
+                  {
+                    "id": "orders__customer_name",
+                    "formula": "[ORDERS/Orders To Customer/C Name]",
+                    "name": "Customer Name"
+                  },
+                  {
+                    "id": "orders__order_month",
+                    "formula": "[ORDERS/Order Month]",
+                    "name": "Order Month"
+                  },
+                  {
+                    "id": "orders__o_orderkey",
+                    "formula": "[ORDERS/O Orderkey]"
+                  },
+                  {
+                    "id": "orders__o_custkey",
+                    "formula": "[ORDERS/O Custkey]"
+                  },
+                  {
+                    "id": "orders__o_orderdate",
+                    "formula": "[ORDERS/O Orderdate]"
+                  }
+                ],
+                "order": [
+                  "orders__o_orderstatus",
+                  "orders__customer_name",
+                  "orders__order_month",
+                  "orders__o_orderkey",
+                  "orders__o_custkey",
+                  "orders__o_orderdate"
+                ]
+              },
+              {
+                "id": "customer",
+                "kind": "table",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "CUSTOMER"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "customer__c_name",
+                    "formula": "[CUSTOMER/C Name]"
+                  },
+                  {
+                    "id": "customer__c_custkey",
+                    "formula": "[CUSTOMER/C Custkey]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "customer__c_custkey"
+                ],
+                "order": [
+                  "customer__c_name",
+                  "customer__c_custkey"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "findingCodes": [
+        "COPY_GRANTS_DROPPED",
+        "GRAIN_METADATA_NOT_EMITTED",
+        "MAX_STALENESS_DROPPED",
+        "PRIVATE_OBJECT",
+        "CROSS_TABLE_FACT_AGGREGATE",
+        "FILTER_LABEL",
+        "COLUMN_TYPES_SKIPPED",
+        "CROSS_TABLE_REFERENCES_MOVED"
+      ]
+    }
+  ]
+}

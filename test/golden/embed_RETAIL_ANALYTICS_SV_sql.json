@@ -1,0 +1,31 @@
+{
+  "fixture": "test/fixtures/embed/RETAIL_ANALYTICS_SV.sql",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS"
+  },
+  "refused": true,
+  "refusedViews": [
+    "RETAIL_ANALYTICS_SV"
+  ],
+  "results": [
+    {
+      "viewName": "RETAIL_ANALYTICS_SV",
+      "ok": false,
+      "findingCodes": [
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "COLUMN_TYPES_SKIPPED"
+      ]
+    }
+  ]
+}

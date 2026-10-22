@@ -1,0 +1,324 @@
+{
+  "fixture": "test/fixtures/embed/tpch.yaml",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS"
+  },
+  "refused": false,
+  "refusedViews": [],
+  "results": [
+    {
+      "viewName": "TPCH_SALES",
+      "ok": true,
+      "model": {
+        "name": "TPCH_SALES",
+        "schemaVersion": 1,
+        "kind": "data-model",
+        "description": "Orders, line items and customers from the Snowflake TPC-H sample data",
+        "pages": [
+          {
+            "id": "page1",
+            "name": "Page 1",
+            "elements": [
+              {
+                "id": "lineitem",
+                "kind": "table",
+                "description": "Order lines, one row per part shipped",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "LINEITEM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "lineitem__l_quantity",
+                    "formula": "[LINEITEM/L Quantity]",
+                    "name": "Quantity"
+                  },
+                  {
+                    "id": "lineitem__l_extendedprice",
+                    "formula": "[LINEITEM/L Extendedprice]",
+                    "name": "Extended Price"
+                  },
+                  {
+                    "id": "lineitem__l_discount",
+                    "formula": "[LINEITEM/L Discount]",
+                    "name": "Discount"
+                  },
+                  {
+                    "id": "lineitem__net_price",
+                    "formula": "[Extended Price] * (1 - [Discount])",
+                    "name": "Net Price",
+                    "description": "Extended price after discount"
+                  },
+                  {
+                    "id": "lineitem__l_orderkey",
+                    "formula": "[LINEITEM/L Orderkey]"
+                  },
+                  {
+                    "id": "lineitem__l_linenumber",
+                    "formula": "[LINEITEM/L Linenumber]"
+                  },
+                  {
+                    "id": "lineitem__l_returnflag",
+                    "formula": "[LINEITEM/L Returnflag]",
+                    "name": "Return Flag",
+                    "description": "R = returned, A = accepted, N = not yet known. Also known as: returned"
+                  },
+                  {
+                    "id": "lineitem__l_shipmode",
+                    "formula": "[LINEITEM/L Shipmode]",
+                    "name": "Ship Mode"
+                  },
+                  {
+                    "id": "lineitem__l_shipdate",
+                    "formula": "[LINEITEM/L Shipdate]",
+                    "name": "Ship Date"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "lineitem__m__total_revenue",
+                    "formula": "Sum([Extended Price] * (1 - [Discount]))",
+                    "name": "Total Revenue",
+                    "description": "Revenue net of discount"
+                  },
+                  {
+                    "id": "lineitem__m__average_discount",
+                    "formula": "Avg([Discount])",
+                    "name": "Average Discount"
+                  },
+                  {
+                    "id": "lineitem__m__order_count",
+                    "formula": "CountDistinct([L Orderkey])",
+                    "name": "Order Count"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "lineitem__to__orders",
+                    "targetElementId": "orders__joined",
+                    "keys": [
+                      {
+                        "sourceColumnId": "lineitem__l_orderkey",
+                        "targetColumnId": "orders__o_orderkey"
+                      }
+                    ],
+                    "name": "Lineitem To Orders",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "lineitem__l_orderkey",
+                  "lineitem__l_linenumber"
+                ],
+                "order": [
+                  "lineitem__l_quantity",
+                  "lineitem__l_extendedprice",
+                  "lineitem__l_discount",
+                  "lineitem__net_price",
+                  "lineitem__l_orderkey",
+                  "lineitem__l_linenumber",
+                  "lineitem__l_returnflag",
+                  "lineitem__l_shipmode",
+                  "lineitem__l_shipdate"
+                ]
+              },
+              {
+                "id": "orders",
+                "kind": "table",
+                "description": "One row per order",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "ORDERS"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "orders__o_totalprice",
+                    "formula": "[ORDERS/O Totalprice]",
+                    "name": "Order Total"
+                  },
+                  {
+                    "id": "orders__o_orderkey",
+                    "formula": "[ORDERS/O Orderkey]"
+                  },
+                  {
+                    "id": "orders__o_custkey",
+                    "formula": "[ORDERS/O Custkey]"
+                  },
+                  {
+                    "id": "orders__o_orderstatus",
+                    "formula": "[ORDERS/O Orderstatus]",
+                    "name": "Order Status",
+                    "description": "F = fulfilled, O = open, P = partial"
+                  },
+                  {
+                    "id": "orders__o_orderpriority",
+                    "formula": "[ORDERS/O Orderpriority]",
+                    "name": "Order Priority"
+                  },
+                  {
+                    "id": "orders__o_orderdate",
+                    "formula": "[ORDERS/O Orderdate]",
+                    "name": "Order Date"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "orders__m__total_order_value",
+                    "formula": "Sum([Order Total])",
+                    "name": "Total Order Value"
+                  },
+                  {
+                    "id": "orders__m__customers_with_orders",
+                    "formula": "CountDistinct([O Custkey])",
+                    "name": "Customers With Orders"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "orders__to__customer",
+                    "targetElementId": "customer",
+                    "keys": [
+                      {
+                        "sourceColumnId": "orders__o_custkey",
+                        "targetColumnId": "customer__c_custkey"
+                      }
+                    ],
+                    "name": "Orders To Customer",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "orders__o_orderkey"
+                ],
+                "order": [
+                  "orders__o_totalprice",
+                  "orders__o_orderkey",
+                  "orders__o_custkey",
+                  "orders__o_orderstatus",
+                  "orders__o_orderpriority",
+                  "orders__o_orderdate"
+                ]
+              },
+              {
+                "id": "orders__joined",
+                "kind": "table",
+                "name": "ORDERS (joined)",
+                "description": "One row per order. Includes columns from related tables: Customer Segment.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "orders"
+                },
+                "columns": [
+                  {
+                    "id": "orders__o_totalprice",
+                    "formula": "[ORDERS/Order Total]",
+                    "name": "Order Total"
+                  },
+                  {
+                    "id": "orders__o_orderkey",
+                    "formula": "[ORDERS/O Orderkey]"
+                  },
+                  {
+                    "id": "orders__o_custkey",
+                    "formula": "[ORDERS/O Custkey]"
+                  },
+                  {
+                    "id": "orders__o_orderstatus",
+                    "formula": "[ORDERS/Order Status]",
+                    "name": "Order Status",
+                    "description": "F = fulfilled, O = open, P = partial"
+                  },
+                  {
+                    "id": "orders__o_orderpriority",
+                    "formula": "[ORDERS/Order Priority]",
+                    "name": "Order Priority"
+                  },
+                  {
+                    "id": "orders__customer_segment",
+                    "formula": "[ORDERS/Orders To Customer/Market Segment]",
+                    "name": "Customer Segment",
+                    "description": "Market segment of the customer who placed the order"
+                  },
+                  {
+                    "id": "orders__o_orderdate",
+                    "formula": "[ORDERS/Order Date]",
+                    "name": "Order Date"
+                  }
+                ],
+                "order": [
+                  "orders__o_totalprice",
+                  "orders__o_orderkey",
+                  "orders__o_custkey",
+                  "orders__o_orderstatus",
+                  "orders__o_orderpriority",
+                  "orders__customer_segment",
+                  "orders__o_orderdate"
+                ]
+              },
+              {
+                "id": "customer",
+                "kind": "table",
+                "description": "One row per customer",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "SNOWFLAKE_SAMPLE_DATA",
+                    "TPCH_SF1",
+                    "CUSTOMER"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "customer__c_acctbal",
+                    "formula": "[CUSTOMER/C Acctbal]",
+                    "name": "Account Balance"
+                  },
+                  {
+                    "id": "customer__c_custkey",
+                    "formula": "[CUSTOMER/C Custkey]"
+                  },
+                  {
+                    "id": "customer__c_name",
+                    "formula": "[CUSTOMER/C Name]",
+                    "name": "Customer Name"
+                  },
+                  {
+                    "id": "customer__c_mktsegment",
+                    "formula": "[CUSTOMER/C Mktsegment]",
+                    "name": "Market Segment"
+                  }
+                ],
+                "uniqueKeys": [
+                  "customer__c_custkey"
+                ],
+                "order": [
+                  "customer__c_acctbal",
+                  "customer__c_custkey",
+                  "customer__c_name",
+                  "customer__c_mktsegment"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "findingCodes": [
+        "COLUMN_TYPES_SKIPPED",
+        "CROSS_TABLE_REFERENCES_MOVED"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,588 @@
+{
+  "fixture": "test/fixtures/workforce_anomaly_ddl.sql",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS"
+  },
+  "refused": false,
+  "refusedViews": [],
+  "results": [
+    {
+      "viewName": "WORKFORCE_ANOMALY_VIEW",
+      "ok": true,
+      "model": {
+        "name": "WORKFORCE_ANOMALY_VIEW",
+        "schemaVersion": 1,
+        "kind": "data-model",
+        "description": "Workforce analytics for Acme Corp: 300 employees, 5 locations, 6 departments, Jan 2024 - Mar 2026.",
+        "pages": [
+          {
+            "id": "page1",
+            "name": "Page 1",
+            "elements": [
+              {
+                "id": "employees",
+                "kind": "table",
+                "description": "Employee roster with role, compensation, and status.",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "EMPLOYEES"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "employees__annual_salary",
+                    "formula": "[EMPLOYEES/Annual Salary]",
+                    "description": "Annual base salary USD. Also known as: salary"
+                  },
+                  {
+                    "id": "employees__employee_id",
+                    "formula": "[EMPLOYEES/Employee Id]",
+                    "description": "Unique employee identifier. Also known as: emp id"
+                  },
+                  {
+                    "id": "employees__employee_name",
+                    "formula": "CallText(\"CONCAT\", [First Name], \" \", [Last Name])",
+                    "name": "Employee Name",
+                    "description": "Full name. Also known as: name"
+                  },
+                  {
+                    "id": "employees__department",
+                    "formula": "[EMPLOYEES/Department]",
+                    "description": "Department name. Also known as: dept"
+                  },
+                  {
+                    "id": "employees__role",
+                    "formula": "[EMPLOYEES/Role]",
+                    "description": "Job title. Also known as: job title"
+                  },
+                  {
+                    "id": "employees__location",
+                    "formula": "[EMPLOYEES/Location]",
+                    "description": "Work location. Also known as: site"
+                  },
+                  {
+                    "id": "employees__status",
+                    "formula": "[EMPLOYEES/Status]",
+                    "description": "Active, Terminated, or Resigned"
+                  },
+                  {
+                    "id": "employees__termination_reason",
+                    "formula": "[EMPLOYEES/Termination Reason]",
+                    "description": "Reason for leaving"
+                  },
+                  {
+                    "id": "employees__manager_id",
+                    "formula": "[EMPLOYEES/Manager Id]",
+                    "description": "Manager employee ID. Also known as: manager"
+                  },
+                  {
+                    "id": "employees__employment_type",
+                    "formula": "[EMPLOYEES/Employment Type]",
+                    "description": "Full-Time or Part-Time"
+                  },
+                  {
+                    "id": "employees__shift",
+                    "formula": "[EMPLOYEES/Shift]",
+                    "description": "Day, Swing, or Night"
+                  },
+                  {
+                    "id": "employees__hire_date",
+                    "formula": "[EMPLOYEES/Hire Date]",
+                    "description": "Date hired"
+                  },
+                  {
+                    "id": "employees__termination_date",
+                    "formula": "[EMPLOYEES/Termination Date]",
+                    "description": "Date terminated or resigned"
+                  },
+                  {
+                    "id": "employees__first_name",
+                    "formula": "[EMPLOYEES/First Name]"
+                  },
+                  {
+                    "id": "employees__last_name",
+                    "formula": "[EMPLOYEES/Last Name]"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "employees__m__headcount",
+                    "formula": "Count([Employee Id])",
+                    "name": "Headcount",
+                    "description": "Total employees"
+                  },
+                  {
+                    "id": "employees__m__active_headcount",
+                    "formula": "CountIf([Status] = \"Active\")",
+                    "name": "Active Headcount",
+                    "description": "Active employees"
+                  },
+                  {
+                    "id": "employees__m__average_salary",
+                    "formula": "Avg([Annual Salary])",
+                    "name": "Average Salary",
+                    "description": "Average annual salary"
+                  }
+                ],
+                "uniqueKeys": [
+                  "employees__employee_id"
+                ],
+                "order": [
+                  "employees__annual_salary",
+                  "employees__employee_id",
+                  "employees__employee_name",
+                  "employees__department",
+                  "employees__role",
+                  "employees__location",
+                  "employees__status",
+                  "employees__termination_reason",
+                  "employees__manager_id",
+                  "employees__employment_type",
+                  "employees__shift",
+                  "employees__hire_date",
+                  "employees__termination_date",
+                  "employees__first_name",
+                  "employees__last_name"
+                ]
+              },
+              {
+                "id": "time_entries",
+                "kind": "table",
+                "description": "Daily time tracking: clock in/out, hours, overtime, break compliance.",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "TIME_ENTRIES"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "time_entries__scheduled_hours",
+                    "formula": "[TIME_ENTRIES/Scheduled Hours]",
+                    "description": "Scheduled hours"
+                  },
+                  {
+                    "id": "time_entries__actual_hours",
+                    "formula": "[TIME_ENTRIES/Actual Hours]",
+                    "description": "Actual hours worked. Also known as: hours worked"
+                  },
+                  {
+                    "id": "time_entries__overtime_hours",
+                    "formula": "[TIME_ENTRIES/Overtime Hours]",
+                    "description": "Overtime hours. Also known as: OT hours"
+                  },
+                  {
+                    "id": "time_entries__entry_id",
+                    "formula": "[TIME_ENTRIES/Entry Id]",
+                    "description": "Time entry ID"
+                  },
+                  {
+                    "id": "time_entries__employee_id",
+                    "formula": "[TIME_ENTRIES/Employee Id]",
+                    "description": "Employee ID"
+                  },
+                  {
+                    "id": "time_entries__location",
+                    "formula": "[TIME_ENTRIES/Location]",
+                    "description": "Work location"
+                  },
+                  {
+                    "id": "time_entries__department",
+                    "formula": "[TIME_ENTRIES/Department]",
+                    "description": "Department"
+                  },
+                  {
+                    "id": "time_entries__break_taken",
+                    "formula": "[TIME_ENTRIES/Break Taken]",
+                    "description": "Whether break was taken"
+                  },
+                  {
+                    "id": "time_entries__date",
+                    "formula": "[TIME_ENTRIES/Date]",
+                    "description": "Date of time entry. Also known as: work date"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "time_entries__m__total_hours_worked",
+                    "formula": "Sum([Actual Hours])",
+                    "name": "Total Hours Worked",
+                    "description": "Sum of actual hours"
+                  },
+                  {
+                    "id": "time_entries__m__total_overtime_hours",
+                    "formula": "Sum([Overtime Hours])",
+                    "name": "Total Overtime Hours",
+                    "description": "Sum of overtime hours"
+                  },
+                  {
+                    "id": "time_entries__m__avg_daily_hours",
+                    "formula": "Avg([Actual Hours])",
+                    "name": "Avg Daily Hours",
+                    "description": "Average hours per day"
+                  },
+                  {
+                    "id": "time_entries__m__break_compliance_rate",
+                    "formula": "Avg(If([Break Taken], 1.0, 0.0)) * 100",
+                    "name": "Break Compliance Rate",
+                    "description": "Percent of shifts with breaks taken"
+                  },
+                  {
+                    "id": "time_entries__m__shift_count",
+                    "formula": "Count([Entry Id])",
+                    "name": "Shift Count",
+                    "description": "Number of shifts"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "time_entries__to__employees",
+                    "targetElementId": "employees",
+                    "keys": [
+                      {
+                        "sourceColumnId": "time_entries__employee_id",
+                        "targetColumnId": "employees__employee_id"
+                      }
+                    ],
+                    "name": "Time Entries To Employees",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "time_entries__entry_id"
+                ],
+                "order": [
+                  "time_entries__scheduled_hours",
+                  "time_entries__actual_hours",
+                  "time_entries__overtime_hours",
+                  "time_entries__entry_id",
+                  "time_entries__employee_id",
+                  "time_entries__location",
+                  "time_entries__department",
+                  "time_entries__break_taken",
+                  "time_entries__date"
+                ]
+              },
+              {
+                "id": "absence_records",
+                "kind": "table",
+                "description": "Employee absences: sick, PTO, personal leave.",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "ABSENCE_RECORDS"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "absence_records__hours",
+                    "formula": "[ABSENCE_RECORDS/Hours]",
+                    "description": "Hours absent (8=full, 4=half)"
+                  },
+                  {
+                    "id": "absence_records__absence_id",
+                    "formula": "[ABSENCE_RECORDS/Absence Id]",
+                    "description": "Absence record ID"
+                  },
+                  {
+                    "id": "absence_records__employee_id",
+                    "formula": "[ABSENCE_RECORDS/Employee Id]",
+                    "description": "Employee ID"
+                  },
+                  {
+                    "id": "absence_records__absence_type",
+                    "formula": "[ABSENCE_RECORDS/Absence Type]",
+                    "description": "Sick, PTO, or Personal"
+                  },
+                  {
+                    "id": "absence_records__day_of_week",
+                    "formula": "[ABSENCE_RECORDS/Day Of Week]",
+                    "description": "Day of week"
+                  },
+                  {
+                    "id": "absence_records__approved",
+                    "formula": "[ABSENCE_RECORDS/Approved]",
+                    "description": "Whether approved"
+                  },
+                  {
+                    "id": "absence_records__department",
+                    "formula": "[ABSENCE_RECORDS/Department]",
+                    "description": "Department"
+                  },
+                  {
+                    "id": "absence_records__location",
+                    "formula": "[ABSENCE_RECORDS/Location]",
+                    "description": "Location"
+                  },
+                  {
+                    "id": "absence_records__date",
+                    "formula": "[ABSENCE_RECORDS/Date]",
+                    "description": "Absence date"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "absence_records__m__total_absences",
+                    "formula": "Count([Absence Id])",
+                    "name": "Total Absences",
+                    "description": "Total absence count"
+                  },
+                  {
+                    "id": "absence_records__m__sick_day_count",
+                    "formula": "CountIf([Absence Type] = \"Sick\")",
+                    "name": "Sick Day Count",
+                    "description": "Sick absence count"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "absence_records__to__employees",
+                    "targetElementId": "employees",
+                    "keys": [
+                      {
+                        "sourceColumnId": "absence_records__employee_id",
+                        "targetColumnId": "employees__employee_id"
+                      }
+                    ],
+                    "name": "Absence Records To Employees",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "absence_records__absence_id"
+                ],
+                "order": [
+                  "absence_records__hours",
+                  "absence_records__absence_id",
+                  "absence_records__employee_id",
+                  "absence_records__absence_type",
+                  "absence_records__day_of_week",
+                  "absence_records__approved",
+                  "absence_records__department",
+                  "absence_records__location",
+                  "absence_records__date"
+                ]
+              },
+              {
+                "id": "safety_incidents",
+                "kind": "table",
+                "description": "Workplace safety incidents and near-misses.",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "SAFETY_INCIDENTS"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "safety_incidents__hours_worked_before_incident",
+                    "formula": "[SAFETY_INCIDENTS/Hours Worked Before Incident]",
+                    "description": "Hours worked before incident"
+                  },
+                  {
+                    "id": "safety_incidents__incident_id",
+                    "formula": "[SAFETY_INCIDENTS/Incident Id]",
+                    "description": "Incident ID"
+                  },
+                  {
+                    "id": "safety_incidents__employee_id",
+                    "formula": "[SAFETY_INCIDENTS/Employee Id]",
+                    "description": "Employee ID"
+                  },
+                  {
+                    "id": "safety_incidents__location",
+                    "formula": "[SAFETY_INCIDENTS/Location]",
+                    "description": "Incident location"
+                  },
+                  {
+                    "id": "safety_incidents__department",
+                    "formula": "[SAFETY_INCIDENTS/Department]",
+                    "description": "Department"
+                  },
+                  {
+                    "id": "safety_incidents__incident_type",
+                    "formula": "[SAFETY_INCIDENTS/Incident Type]",
+                    "description": "Type of incident"
+                  },
+                  {
+                    "id": "safety_incidents__severity",
+                    "formula": "[SAFETY_INCIDENTS/Severity]",
+                    "description": "Low, Medium, High, or Critical"
+                  },
+                  {
+                    "id": "safety_incidents__overtime_on_day",
+                    "formula": "[SAFETY_INCIDENTS/Overtime On Day]",
+                    "description": "Whether employee was on overtime"
+                  },
+                  {
+                    "id": "safety_incidents__date",
+                    "formula": "[SAFETY_INCIDENTS/Date]",
+                    "description": "Incident date"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "safety_incidents__m__incident_count",
+                    "formula": "Count([Incident Id])",
+                    "name": "Incident Count",
+                    "description": "Total incidents"
+                  },
+                  {
+                    "id": "safety_incidents__m__critical_incident_count",
+                    "formula": "CountIf(In([Severity], \"High\", \"Critical\"))",
+                    "name": "Critical Incident Count",
+                    "description": "High or Critical incidents"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "safety_incidents__to__employees",
+                    "targetElementId": "employees",
+                    "keys": [
+                      {
+                        "sourceColumnId": "safety_incidents__employee_id",
+                        "targetColumnId": "employees__employee_id"
+                      }
+                    ],
+                    "name": "Safety Incidents To Employees",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "safety_incidents__incident_id"
+                ],
+                "order": [
+                  "safety_incidents__hours_worked_before_incident",
+                  "safety_incidents__incident_id",
+                  "safety_incidents__employee_id",
+                  "safety_incidents__location",
+                  "safety_incidents__department",
+                  "safety_incidents__incident_type",
+                  "safety_incidents__severity",
+                  "safety_incidents__overtime_on_day",
+                  "safety_incidents__date"
+                ]
+              },
+              {
+                "id": "labor_costs",
+                "kind": "table",
+                "description": "Monthly labor costs by location and department.",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "LABOR_COSTS"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "labor_costs__headcount",
+                    "formula": "[LABOR_COSTS/Headcount]",
+                    "description": "Monthly headcount"
+                  },
+                  {
+                    "id": "labor_costs__base_payroll",
+                    "formula": "[LABOR_COSTS/Base Payroll]",
+                    "description": "Base payroll USD. Also known as: payroll"
+                  },
+                  {
+                    "id": "labor_costs__overtime_cost",
+                    "formula": "[LABOR_COSTS/Overtime Cost]",
+                    "description": "Overtime cost USD"
+                  },
+                  {
+                    "id": "labor_costs__temp_worker_cost",
+                    "formula": "[LABOR_COSTS/Temp Worker Cost]",
+                    "description": "Temp worker cost USD"
+                  },
+                  {
+                    "id": "labor_costs__benefits_cost",
+                    "formula": "[LABOR_COSTS/Benefits Cost]",
+                    "description": "Benefits cost USD"
+                  },
+                  {
+                    "id": "labor_costs__total_labor_cost",
+                    "formula": "[LABOR_COSTS/Total Labor Cost]",
+                    "description": "Total labor cost USD"
+                  },
+                  {
+                    "id": "labor_costs__cost_id",
+                    "formula": "[LABOR_COSTS/Cost Id]",
+                    "description": "Cost record ID"
+                  },
+                  {
+                    "id": "labor_costs__location",
+                    "formula": "[LABOR_COSTS/Location]",
+                    "description": "Location"
+                  },
+                  {
+                    "id": "labor_costs__department",
+                    "formula": "[LABOR_COSTS/Department]",
+                    "description": "Department"
+                  },
+                  {
+                    "id": "labor_costs__month",
+                    "formula": "[LABOR_COSTS/Month]",
+                    "description": "Month of cost record. Also known as: period"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "labor_costs__m__total_labor_spend",
+                    "formula": "Sum([Total Labor Cost])",
+                    "name": "Total Labor Spend",
+                    "description": "Sum of total labor costs"
+                  },
+                  {
+                    "id": "labor_costs__m__total_overtime_spend",
+                    "formula": "Sum([Overtime Cost])",
+                    "name": "Total Overtime Spend",
+                    "description": "Sum of overtime costs"
+                  }
+                ],
+                "uniqueKeys": [
+                  "labor_costs__cost_id"
+                ],
+                "order": [
+                  "labor_costs__headcount",
+                  "labor_costs__base_payroll",
+                  "labor_costs__overtime_cost",
+                  "labor_costs__temp_worker_cost",
+                  "labor_costs__benefits_cost",
+                  "labor_costs__total_labor_cost",
+                  "labor_costs__cost_id",
+                  "labor_costs__location",
+                  "labor_costs__department",
+                  "labor_costs__month"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "findingCodes": [
+        "AI_INSTRUCTIONS_DROPPED",
+        "EXPRESSION_PASSTHROUGH",
+        "COLUMN_TYPES_SKIPPED",
+        "MULTI_FACT_SHARED_DIMENSIONS"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2232 @@
+{
+  "fixture": "test/fixtures/retail_analytics_sv_best_effort.sql",
+  "options": {
+    "connectionId": "00000000-0000-4000-8000-000000000000",
+    "database": "ANALYTICS",
+    "schema": "MODELS",
+    "bestEffort": true
+  },
+  "refused": false,
+  "refusedViews": [],
+  "results": [
+    {
+      "viewName": "RETAIL_ANALYTICS_SV",
+      "ok": true,
+      "model": {
+        "name": "RETAIL_ANALYTICS_SV",
+        "schemaVersion": 1,
+        "kind": "data-model",
+        "description": "Retail analytics semantic view with role-playing store and date dimensions",
+        "pages": [
+          {
+            "id": "page1",
+            "name": "Page 1",
+            "elements": [
+              {
+                "id": "order_fact",
+                "kind": "table",
+                "description": "Central fact table for retail orders at order-line grain",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "ORDER_FACT"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]"
+                  },
+                  {
+                    "id": "order_fact__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]"
+                  },
+                  {
+                    "id": "order_fact__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]"
+                  },
+                  {
+                    "id": "order_fact__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]"
+                  },
+                  {
+                    "id": "order_fact__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]"
+                  },
+                  {
+                    "id": "order_fact__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]"
+                  },
+                  {
+                    "id": "order_fact__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]"
+                  },
+                  {
+                    "id": "order_fact__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]"
+                  },
+                  {
+                    "id": "order_fact__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]"
+                  },
+                  {
+                    "id": "order_fact__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]"
+                  },
+                  {
+                    "id": "order_fact__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]"
+                  },
+                  {
+                    "id": "order_fact__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]"
+                  },
+                  {
+                    "id": "order_fact__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]"
+                  },
+                  {
+                    "id": "order_fact__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]"
+                  },
+                  {
+                    "id": "order_fact__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]"
+                  },
+                  {
+                    "id": "order_fact__order_id",
+                    "formula": "[ORDER_FACT/Order Id]"
+                  },
+                  {
+                    "id": "order_fact__order_line",
+                    "formula": "[ORDER_FACT/Order Line]"
+                  },
+                  {
+                    "id": "order_fact__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]"
+                  },
+                  {
+                    "id": "order_fact__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]"
+                  },
+                  {
+                    "id": "order_fact__order_status",
+                    "formula": "[ORDER_FACT/Order Status]"
+                  },
+                  {
+                    "id": "order_fact__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]"
+                  },
+                  {
+                    "id": "order_fact__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]"
+                  },
+                  {
+                    "id": "order_fact__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]"
+                  },
+                  {
+                    "id": "order_fact__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]"
+                  },
+                  {
+                    "id": "order_fact__product_key",
+                    "formula": "[ORDER_FACT/Product Key]"
+                  },
+                  {
+                    "id": "order_fact__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]"
+                  },
+                  {
+                    "id": "order_fact__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]"
+                  },
+                  {
+                    "id": "order_fact__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__m__total_net_revenue",
+                    "formula": "Sum([Net Revenue])",
+                    "name": "Total Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__m__total_gross_profit",
+                    "formula": "Sum([Gross Profit])",
+                    "name": "Total Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__m__total_net_profit",
+                    "formula": "Sum([Net Profit])",
+                    "name": "Total Net Profit"
+                  },
+                  {
+                    "id": "order_fact__m__total_discount",
+                    "formula": "Sum([Discount Amount])",
+                    "name": "Total Discount"
+                  },
+                  {
+                    "id": "order_fact__m__total_shipping",
+                    "formula": "Sum([Shipping Amount])",
+                    "name": "Total Shipping"
+                  },
+                  {
+                    "id": "order_fact__m__total_tax",
+                    "formula": "Sum([Tax Amount])",
+                    "name": "Total Tax"
+                  },
+                  {
+                    "id": "order_fact__m__total_quantity_ordered",
+                    "formula": "Sum([Quantity Ordered])",
+                    "name": "Total Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__m__total_quantity_returned",
+                    "formula": "Sum([Quantity Returned])",
+                    "name": "Total Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count",
+                    "formula": "Count()",
+                    "name": "Order Line Count"
+                  },
+                  {
+                    "id": "order_fact__m__avg_days_to_ship",
+                    "formula": "Avg([Days To Ship])",
+                    "name": "Avg Days To Ship"
+                  }
+                ],
+                "relationships": [
+                  {
+                    "id": "order_fact__to__customer_dim",
+                    "targetElementId": "customer_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__customer_key",
+                        "targetColumnId": "customer_dim__customer_key"
+                      }
+                    ],
+                    "name": "Order To Customer",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__date_dim",
+                    "targetElementId": "date_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__order_date_key",
+                        "targetColumnId": "date_dim__date_key"
+                      }
+                    ],
+                    "name": "Order To Order Date",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__date_dim__2",
+                    "targetElementId": "date_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__ship_date_key",
+                        "targetColumnId": "date_dim__date_key"
+                      }
+                    ],
+                    "name": "Order To Ship Date",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__date_dim__3",
+                    "targetElementId": "date_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__return_date_key",
+                        "targetColumnId": "date_dim__date_key"
+                      }
+                    ],
+                    "name": "Order To Return Date",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__product_dim",
+                    "targetElementId": "product_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__product_key",
+                        "targetColumnId": "product_dim__product_key"
+                      }
+                    ],
+                    "name": "Order To Product",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__promo_dim",
+                    "targetElementId": "promo_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__promo_key",
+                        "targetColumnId": "promo_dim__promo_key"
+                      }
+                    ],
+                    "name": "Order To Promo",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__store_dim",
+                    "targetElementId": "store_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__order_store_key",
+                        "targetColumnId": "store_dim__store_key"
+                      }
+                    ],
+                    "name": "Order To Order Store",
+                    "relationshipType": "N:1"
+                  },
+                  {
+                    "id": "order_fact__to__store_dim__2",
+                    "targetElementId": "store_dim",
+                    "keys": [
+                      {
+                        "sourceColumnId": "order_fact__ship_store_key",
+                        "targetColumnId": "store_dim__store_key"
+                      }
+                    ],
+                    "name": "Order To Ship Store",
+                    "relationshipType": "N:1"
+                  }
+                ],
+                "uniqueKeys": [
+                  "order_fact__order_id",
+                  "order_fact__order_line"
+                ],
+                "order": [
+                  "order_fact__quantity_ordered",
+                  "order_fact__quantity_returned",
+                  "order_fact__unit_price",
+                  "order_fact__unit_cost",
+                  "order_fact__discount_amount",
+                  "order_fact__shipping_amount",
+                  "order_fact__tax_amount",
+                  "order_fact__gross_revenue",
+                  "order_fact__net_revenue",
+                  "order_fact__gross_profit",
+                  "order_fact__net_profit",
+                  "order_fact__days_to_ship",
+                  "order_fact__is_first_order",
+                  "order_fact__is_returned",
+                  "order_fact__is_cancelled",
+                  "order_fact__order_id",
+                  "order_fact__order_line",
+                  "order_fact__order_channel",
+                  "order_fact__ship_method",
+                  "order_fact__order_status",
+                  "order_fact__customer_key",
+                  "order_fact__order_date_key",
+                  "order_fact__ship_date_key",
+                  "order_fact__return_date_key",
+                  "order_fact__product_key",
+                  "order_fact__promo_key",
+                  "order_fact__order_store_key",
+                  "order_fact__ship_store_key"
+                ]
+              },
+              {
+                "id": "order_fact__via__order_fact__to__date_dim",
+                "kind": "table",
+                "name": "ORDER_FACT (via Order To Order Date)",
+                "description": "ORDER_FACT joined only through Order To Order Date. Metrics here follow Snowflake's USING (ORDER_TO_ORDER_DATE) path — slice them by this element's columns.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "order_fact"
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]",
+                    "name": "Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]",
+                    "name": "Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]",
+                    "name": "Unit Price"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]",
+                    "name": "Unit Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]",
+                    "name": "Discount Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]",
+                    "name": "Shipping Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]",
+                    "name": "Tax Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]",
+                    "name": "Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]",
+                    "name": "Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]",
+                    "name": "Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]",
+                    "name": "Net Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]",
+                    "name": "Days To Ship"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]",
+                    "name": "Is First Order"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]",
+                    "name": "Is Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]",
+                    "name": "Is Cancelled"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_id",
+                    "formula": "[ORDER_FACT/Order Id]",
+                    "name": "Order Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_line",
+                    "formula": "[ORDER_FACT/Order Line]",
+                    "name": "Order Line"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]",
+                    "name": "Order Channel"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]",
+                    "name": "Ship Method"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_status",
+                    "formula": "[ORDER_FACT/Order Status]",
+                    "name": "Order Status"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]",
+                    "name": "Customer Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]",
+                    "name": "Order Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]",
+                    "name": "Ship Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]",
+                    "name": "Return Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__product_key",
+                    "formula": "[ORDER_FACT/Product Key]",
+                    "name": "Product Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]",
+                    "name": "Promo Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]",
+                    "name": "Order Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]",
+                    "name": "Ship Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__day_of_month",
+                    "formula": "[ORDER_FACT/Order To Order Date/Day of Month]",
+                    "name": "Day Of Month"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__week_of_year",
+                    "formula": "[ORDER_FACT/Order To Order Date/Week of Year]",
+                    "name": "Week Of Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__month_number",
+                    "formula": "[ORDER_FACT/Order To Order Date/Month Number]",
+                    "name": "Month Number"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__quarter",
+                    "formula": "[ORDER_FACT/Order To Order Date/Quarter]",
+                    "name": "Quarter"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__year",
+                    "formula": "[ORDER_FACT/Order To Order Date/Year]",
+                    "name": "Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__is_weekend",
+                    "formula": "[ORDER_FACT/Order To Order Date/Is Weekend]",
+                    "name": "Is Weekend"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__is_holiday",
+                    "formula": "[ORDER_FACT/Order To Order Date/Is Holiday]",
+                    "name": "Is Holiday"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__date_key",
+                    "formula": "[ORDER_FACT/Order To Order Date/Date Key]",
+                    "name": "Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__full_date",
+                    "formula": "[ORDER_FACT/Order To Order Date/Full Date]",
+                    "name": "Full Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__day_of_week",
+                    "formula": "[ORDER_FACT/Order To Order Date/Day of Week]",
+                    "name": "Day Of Week"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__month_name",
+                    "formula": "[ORDER_FACT/Order To Order Date/Month Name]",
+                    "name": "Month Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__fiscal_period",
+                    "formula": "[ORDER_FACT/Order To Order Date/Fiscal Period]",
+                    "name": "Fiscal Period"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue_by_order_date",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue By Order Date"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count_by_order_date",
+                    "formula": "Count()",
+                    "name": "Order Line Count By Order Date"
+                  }
+                ],
+                "order": [
+                  "order_fact__via__order_fact__to__date_dim__quantity_ordered",
+                  "order_fact__via__order_fact__to__date_dim__quantity_returned",
+                  "order_fact__via__order_fact__to__date_dim__unit_price",
+                  "order_fact__via__order_fact__to__date_dim__unit_cost",
+                  "order_fact__via__order_fact__to__date_dim__discount_amount",
+                  "order_fact__via__order_fact__to__date_dim__shipping_amount",
+                  "order_fact__via__order_fact__to__date_dim__tax_amount",
+                  "order_fact__via__order_fact__to__date_dim__gross_revenue",
+                  "order_fact__via__order_fact__to__date_dim__net_revenue",
+                  "order_fact__via__order_fact__to__date_dim__gross_profit",
+                  "order_fact__via__order_fact__to__date_dim__net_profit",
+                  "order_fact__via__order_fact__to__date_dim__days_to_ship",
+                  "order_fact__via__order_fact__to__date_dim__is_first_order",
+                  "order_fact__via__order_fact__to__date_dim__is_returned",
+                  "order_fact__via__order_fact__to__date_dim__is_cancelled",
+                  "order_fact__via__order_fact__to__date_dim__order_id",
+                  "order_fact__via__order_fact__to__date_dim__order_line",
+                  "order_fact__via__order_fact__to__date_dim__order_channel",
+                  "order_fact__via__order_fact__to__date_dim__ship_method",
+                  "order_fact__via__order_fact__to__date_dim__order_status",
+                  "order_fact__via__order_fact__to__date_dim__customer_key",
+                  "order_fact__via__order_fact__to__date_dim__order_date_key",
+                  "order_fact__via__order_fact__to__date_dim__ship_date_key",
+                  "order_fact__via__order_fact__to__date_dim__return_date_key",
+                  "order_fact__via__order_fact__to__date_dim__product_key",
+                  "order_fact__via__order_fact__to__date_dim__promo_key",
+                  "order_fact__via__order_fact__to__date_dim__order_store_key",
+                  "order_fact__via__order_fact__to__date_dim__ship_store_key",
+                  "order_fact__via__order_fact__to__date_dim__day_of_month",
+                  "order_fact__via__order_fact__to__date_dim__week_of_year",
+                  "order_fact__via__order_fact__to__date_dim__month_number",
+                  "order_fact__via__order_fact__to__date_dim__quarter",
+                  "order_fact__via__order_fact__to__date_dim__year",
+                  "order_fact__via__order_fact__to__date_dim__is_weekend",
+                  "order_fact__via__order_fact__to__date_dim__is_holiday",
+                  "order_fact__via__order_fact__to__date_dim__date_key",
+                  "order_fact__via__order_fact__to__date_dim__full_date",
+                  "order_fact__via__order_fact__to__date_dim__day_of_week",
+                  "order_fact__via__order_fact__to__date_dim__month_name",
+                  "order_fact__via__order_fact__to__date_dim__fiscal_period"
+                ]
+              },
+              {
+                "id": "order_fact__via__order_fact__to__date_dim__2",
+                "kind": "table",
+                "name": "ORDER_FACT (via Order To Ship Date)",
+                "description": "ORDER_FACT joined only through Order To Ship Date. Metrics here follow Snowflake's USING (ORDER_TO_SHIP_DATE) path — slice them by this element's columns.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "order_fact"
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]",
+                    "name": "Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]",
+                    "name": "Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]",
+                    "name": "Unit Price"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]",
+                    "name": "Unit Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]",
+                    "name": "Discount Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]",
+                    "name": "Shipping Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]",
+                    "name": "Tax Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]",
+                    "name": "Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]",
+                    "name": "Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]",
+                    "name": "Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]",
+                    "name": "Net Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]",
+                    "name": "Days To Ship"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]",
+                    "name": "Is First Order"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]",
+                    "name": "Is Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]",
+                    "name": "Is Cancelled"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_id",
+                    "formula": "[ORDER_FACT/Order Id]",
+                    "name": "Order Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_line",
+                    "formula": "[ORDER_FACT/Order Line]",
+                    "name": "Order Line"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]",
+                    "name": "Order Channel"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]",
+                    "name": "Ship Method"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_status",
+                    "formula": "[ORDER_FACT/Order Status]",
+                    "name": "Order Status"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]",
+                    "name": "Customer Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]",
+                    "name": "Order Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]",
+                    "name": "Ship Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]",
+                    "name": "Return Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__product_key",
+                    "formula": "[ORDER_FACT/Product Key]",
+                    "name": "Product Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]",
+                    "name": "Promo Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]",
+                    "name": "Order Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]",
+                    "name": "Ship Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__day_of_month",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Day of Month]",
+                    "name": "Day Of Month"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__week_of_year",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Week of Year]",
+                    "name": "Week Of Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__month_number",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Month Number]",
+                    "name": "Month Number"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__quarter",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Quarter]",
+                    "name": "Quarter"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__year",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Year]",
+                    "name": "Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__is_weekend",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Is Weekend]",
+                    "name": "Is Weekend"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__is_holiday",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Is Holiday]",
+                    "name": "Is Holiday"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__date_key",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Date Key]",
+                    "name": "Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__full_date",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Full Date]",
+                    "name": "Full Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__day_of_week",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Day of Week]",
+                    "name": "Day Of Week"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__month_name",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Month Name]",
+                    "name": "Month Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__2__fiscal_period",
+                    "formula": "[ORDER_FACT/Order To Ship Date/Fiscal Period]",
+                    "name": "Fiscal Period"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue_by_ship_date",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue By Ship Date"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count_by_ship_date",
+                    "formula": "Count()",
+                    "name": "Order Line Count By Ship Date"
+                  }
+                ],
+                "order": [
+                  "order_fact__via__order_fact__to__date_dim__2__quantity_ordered",
+                  "order_fact__via__order_fact__to__date_dim__2__quantity_returned",
+                  "order_fact__via__order_fact__to__date_dim__2__unit_price",
+                  "order_fact__via__order_fact__to__date_dim__2__unit_cost",
+                  "order_fact__via__order_fact__to__date_dim__2__discount_amount",
+                  "order_fact__via__order_fact__to__date_dim__2__shipping_amount",
+                  "order_fact__via__order_fact__to__date_dim__2__tax_amount",
+                  "order_fact__via__order_fact__to__date_dim__2__gross_revenue",
+                  "order_fact__via__order_fact__to__date_dim__2__net_revenue",
+                  "order_fact__via__order_fact__to__date_dim__2__gross_profit",
+                  "order_fact__via__order_fact__to__date_dim__2__net_profit",
+                  "order_fact__via__order_fact__to__date_dim__2__days_to_ship",
+                  "order_fact__via__order_fact__to__date_dim__2__is_first_order",
+                  "order_fact__via__order_fact__to__date_dim__2__is_returned",
+                  "order_fact__via__order_fact__to__date_dim__2__is_cancelled",
+                  "order_fact__via__order_fact__to__date_dim__2__order_id",
+                  "order_fact__via__order_fact__to__date_dim__2__order_line",
+                  "order_fact__via__order_fact__to__date_dim__2__order_channel",
+                  "order_fact__via__order_fact__to__date_dim__2__ship_method",
+                  "order_fact__via__order_fact__to__date_dim__2__order_status",
+                  "order_fact__via__order_fact__to__date_dim__2__customer_key",
+                  "order_fact__via__order_fact__to__date_dim__2__order_date_key",
+                  "order_fact__via__order_fact__to__date_dim__2__ship_date_key",
+                  "order_fact__via__order_fact__to__date_dim__2__return_date_key",
+                  "order_fact__via__order_fact__to__date_dim__2__product_key",
+                  "order_fact__via__order_fact__to__date_dim__2__promo_key",
+                  "order_fact__via__order_fact__to__date_dim__2__order_store_key",
+                  "order_fact__via__order_fact__to__date_dim__2__ship_store_key",
+                  "order_fact__via__order_fact__to__date_dim__2__day_of_month",
+                  "order_fact__via__order_fact__to__date_dim__2__week_of_year",
+                  "order_fact__via__order_fact__to__date_dim__2__month_number",
+                  "order_fact__via__order_fact__to__date_dim__2__quarter",
+                  "order_fact__via__order_fact__to__date_dim__2__year",
+                  "order_fact__via__order_fact__to__date_dim__2__is_weekend",
+                  "order_fact__via__order_fact__to__date_dim__2__is_holiday",
+                  "order_fact__via__order_fact__to__date_dim__2__date_key",
+                  "order_fact__via__order_fact__to__date_dim__2__full_date",
+                  "order_fact__via__order_fact__to__date_dim__2__day_of_week",
+                  "order_fact__via__order_fact__to__date_dim__2__month_name",
+                  "order_fact__via__order_fact__to__date_dim__2__fiscal_period"
+                ]
+              },
+              {
+                "id": "order_fact__via__order_fact__to__date_dim__3",
+                "kind": "table",
+                "name": "ORDER_FACT (via Order To Return Date)",
+                "description": "ORDER_FACT joined only through Order To Return Date. Metrics here follow Snowflake's USING (ORDER_TO_RETURN_DATE) path — slice them by this element's columns.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "order_fact"
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]",
+                    "name": "Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]",
+                    "name": "Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]",
+                    "name": "Unit Price"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]",
+                    "name": "Unit Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]",
+                    "name": "Discount Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]",
+                    "name": "Shipping Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]",
+                    "name": "Tax Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]",
+                    "name": "Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]",
+                    "name": "Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]",
+                    "name": "Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]",
+                    "name": "Net Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]",
+                    "name": "Days To Ship"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]",
+                    "name": "Is First Order"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]",
+                    "name": "Is Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]",
+                    "name": "Is Cancelled"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_id",
+                    "formula": "[ORDER_FACT/Order Id]",
+                    "name": "Order Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_line",
+                    "formula": "[ORDER_FACT/Order Line]",
+                    "name": "Order Line"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]",
+                    "name": "Order Channel"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]",
+                    "name": "Ship Method"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_status",
+                    "formula": "[ORDER_FACT/Order Status]",
+                    "name": "Order Status"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]",
+                    "name": "Customer Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]",
+                    "name": "Order Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]",
+                    "name": "Ship Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]",
+                    "name": "Return Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__product_key",
+                    "formula": "[ORDER_FACT/Product Key]",
+                    "name": "Product Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]",
+                    "name": "Promo Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]",
+                    "name": "Order Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]",
+                    "name": "Ship Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__day_of_month",
+                    "formula": "[ORDER_FACT/Order To Return Date/Day of Month]",
+                    "name": "Day Of Month"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__week_of_year",
+                    "formula": "[ORDER_FACT/Order To Return Date/Week of Year]",
+                    "name": "Week Of Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__month_number",
+                    "formula": "[ORDER_FACT/Order To Return Date/Month Number]",
+                    "name": "Month Number"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__quarter",
+                    "formula": "[ORDER_FACT/Order To Return Date/Quarter]",
+                    "name": "Quarter"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__year",
+                    "formula": "[ORDER_FACT/Order To Return Date/Year]",
+                    "name": "Year"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__is_weekend",
+                    "formula": "[ORDER_FACT/Order To Return Date/Is Weekend]",
+                    "name": "Is Weekend"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__is_holiday",
+                    "formula": "[ORDER_FACT/Order To Return Date/Is Holiday]",
+                    "name": "Is Holiday"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__date_key",
+                    "formula": "[ORDER_FACT/Order To Return Date/Date Key]",
+                    "name": "Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__full_date",
+                    "formula": "[ORDER_FACT/Order To Return Date/Full Date]",
+                    "name": "Full Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__day_of_week",
+                    "formula": "[ORDER_FACT/Order To Return Date/Day of Week]",
+                    "name": "Day Of Week"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__month_name",
+                    "formula": "[ORDER_FACT/Order To Return Date/Month Name]",
+                    "name": "Month Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__date_dim__3__fiscal_period",
+                    "formula": "[ORDER_FACT/Order To Return Date/Fiscal Period]",
+                    "name": "Fiscal Period"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue_by_return_date",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue By Return Date"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count_by_return_date",
+                    "formula": "Count()",
+                    "name": "Order Line Count By Return Date"
+                  }
+                ],
+                "order": [
+                  "order_fact__via__order_fact__to__date_dim__3__quantity_ordered",
+                  "order_fact__via__order_fact__to__date_dim__3__quantity_returned",
+                  "order_fact__via__order_fact__to__date_dim__3__unit_price",
+                  "order_fact__via__order_fact__to__date_dim__3__unit_cost",
+                  "order_fact__via__order_fact__to__date_dim__3__discount_amount",
+                  "order_fact__via__order_fact__to__date_dim__3__shipping_amount",
+                  "order_fact__via__order_fact__to__date_dim__3__tax_amount",
+                  "order_fact__via__order_fact__to__date_dim__3__gross_revenue",
+                  "order_fact__via__order_fact__to__date_dim__3__net_revenue",
+                  "order_fact__via__order_fact__to__date_dim__3__gross_profit",
+                  "order_fact__via__order_fact__to__date_dim__3__net_profit",
+                  "order_fact__via__order_fact__to__date_dim__3__days_to_ship",
+                  "order_fact__via__order_fact__to__date_dim__3__is_first_order",
+                  "order_fact__via__order_fact__to__date_dim__3__is_returned",
+                  "order_fact__via__order_fact__to__date_dim__3__is_cancelled",
+                  "order_fact__via__order_fact__to__date_dim__3__order_id",
+                  "order_fact__via__order_fact__to__date_dim__3__order_line",
+                  "order_fact__via__order_fact__to__date_dim__3__order_channel",
+                  "order_fact__via__order_fact__to__date_dim__3__ship_method",
+                  "order_fact__via__order_fact__to__date_dim__3__order_status",
+                  "order_fact__via__order_fact__to__date_dim__3__customer_key",
+                  "order_fact__via__order_fact__to__date_dim__3__order_date_key",
+                  "order_fact__via__order_fact__to__date_dim__3__ship_date_key",
+                  "order_fact__via__order_fact__to__date_dim__3__return_date_key",
+                  "order_fact__via__order_fact__to__date_dim__3__product_key",
+                  "order_fact__via__order_fact__to__date_dim__3__promo_key",
+                  "order_fact__via__order_fact__to__date_dim__3__order_store_key",
+                  "order_fact__via__order_fact__to__date_dim__3__ship_store_key",
+                  "order_fact__via__order_fact__to__date_dim__3__day_of_month",
+                  "order_fact__via__order_fact__to__date_dim__3__week_of_year",
+                  "order_fact__via__order_fact__to__date_dim__3__month_number",
+                  "order_fact__via__order_fact__to__date_dim__3__quarter",
+                  "order_fact__via__order_fact__to__date_dim__3__year",
+                  "order_fact__via__order_fact__to__date_dim__3__is_weekend",
+                  "order_fact__via__order_fact__to__date_dim__3__is_holiday",
+                  "order_fact__via__order_fact__to__date_dim__3__date_key",
+                  "order_fact__via__order_fact__to__date_dim__3__full_date",
+                  "order_fact__via__order_fact__to__date_dim__3__day_of_week",
+                  "order_fact__via__order_fact__to__date_dim__3__month_name",
+                  "order_fact__via__order_fact__to__date_dim__3__fiscal_period"
+                ]
+              },
+              {
+                "id": "order_fact__via__order_fact__to__store_dim",
+                "kind": "table",
+                "name": "ORDER_FACT (via Order To Order Store)",
+                "description": "ORDER_FACT joined only through Order To Order Store. Metrics here follow Snowflake's USING (ORDER_TO_ORDER_STORE) path — slice them by this element's columns.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "order_fact"
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]",
+                    "name": "Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]",
+                    "name": "Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]",
+                    "name": "Unit Price"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]",
+                    "name": "Unit Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]",
+                    "name": "Discount Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]",
+                    "name": "Shipping Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]",
+                    "name": "Tax Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]",
+                    "name": "Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]",
+                    "name": "Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]",
+                    "name": "Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]",
+                    "name": "Net Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]",
+                    "name": "Days To Ship"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]",
+                    "name": "Is First Order"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]",
+                    "name": "Is Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]",
+                    "name": "Is Cancelled"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_id",
+                    "formula": "[ORDER_FACT/Order Id]",
+                    "name": "Order Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_line",
+                    "formula": "[ORDER_FACT/Order Line]",
+                    "name": "Order Line"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]",
+                    "name": "Order Channel"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]",
+                    "name": "Ship Method"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_status",
+                    "formula": "[ORDER_FACT/Order Status]",
+                    "name": "Order Status"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]",
+                    "name": "Customer Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]",
+                    "name": "Order Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]",
+                    "name": "Ship Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]",
+                    "name": "Return Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__product_key",
+                    "formula": "[ORDER_FACT/Product Key]",
+                    "name": "Product Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]",
+                    "name": "Promo Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]",
+                    "name": "Order Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]",
+                    "name": "Ship Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__square_footage",
+                    "formula": "[ORDER_FACT/Order To Order Store/Square Footage]",
+                    "name": "Square Footage"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__annual_lease_cost",
+                    "formula": "[ORDER_FACT/Order To Order Store/Annual Lease Cost]",
+                    "name": "Annual Lease Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_is_active",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Is Active]",
+                    "name": "Store Is Active"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__has_cafe",
+                    "formula": "[ORDER_FACT/Order To Order Store/Has Cafe]",
+                    "name": "Has Cafe"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__has_curbside",
+                    "formula": "[ORDER_FACT/Order To Order Store/Has Curbside]",
+                    "name": "Has Curbside"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_key",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Key]",
+                    "name": "Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_id",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Id]",
+                    "name": "Store Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_name",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Name]",
+                    "name": "Store Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_type",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Type]",
+                    "name": "Store Type"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_city",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store City]",
+                    "name": "Store City"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_state",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store State]",
+                    "name": "Store State"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_region",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Region]",
+                    "name": "Store Region"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__district",
+                    "formula": "[ORDER_FACT/Order To Order Store/District]",
+                    "name": "District"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__open_date",
+                    "formula": "[ORDER_FACT/Order To Order Store/Open Date]",
+                    "name": "Open Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__close_date",
+                    "formula": "[ORDER_FACT/Order To Order Store/Close Date]",
+                    "name": "Close Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__manager_name",
+                    "formula": "[ORDER_FACT/Order To Order Store/Manager Name]",
+                    "name": "Manager Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__store_phone",
+                    "formula": "[ORDER_FACT/Order To Order Store/Store Phone]",
+                    "name": "Store Phone"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue_by_order_store",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue By Order Store"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count_by_order_store",
+                    "formula": "Count()",
+                    "name": "Order Line Count By Order Store"
+                  }
+                ],
+                "order": [
+                  "order_fact__via__order_fact__to__store_dim__quantity_ordered",
+                  "order_fact__via__order_fact__to__store_dim__quantity_returned",
+                  "order_fact__via__order_fact__to__store_dim__unit_price",
+                  "order_fact__via__order_fact__to__store_dim__unit_cost",
+                  "order_fact__via__order_fact__to__store_dim__discount_amount",
+                  "order_fact__via__order_fact__to__store_dim__shipping_amount",
+                  "order_fact__via__order_fact__to__store_dim__tax_amount",
+                  "order_fact__via__order_fact__to__store_dim__gross_revenue",
+                  "order_fact__via__order_fact__to__store_dim__net_revenue",
+                  "order_fact__via__order_fact__to__store_dim__gross_profit",
+                  "order_fact__via__order_fact__to__store_dim__net_profit",
+                  "order_fact__via__order_fact__to__store_dim__days_to_ship",
+                  "order_fact__via__order_fact__to__store_dim__is_first_order",
+                  "order_fact__via__order_fact__to__store_dim__is_returned",
+                  "order_fact__via__order_fact__to__store_dim__is_cancelled",
+                  "order_fact__via__order_fact__to__store_dim__order_id",
+                  "order_fact__via__order_fact__to__store_dim__order_line",
+                  "order_fact__via__order_fact__to__store_dim__order_channel",
+                  "order_fact__via__order_fact__to__store_dim__ship_method",
+                  "order_fact__via__order_fact__to__store_dim__order_status",
+                  "order_fact__via__order_fact__to__store_dim__customer_key",
+                  "order_fact__via__order_fact__to__store_dim__order_date_key",
+                  "order_fact__via__order_fact__to__store_dim__ship_date_key",
+                  "order_fact__via__order_fact__to__store_dim__return_date_key",
+                  "order_fact__via__order_fact__to__store_dim__product_key",
+                  "order_fact__via__order_fact__to__store_dim__promo_key",
+                  "order_fact__via__order_fact__to__store_dim__order_store_key",
+                  "order_fact__via__order_fact__to__store_dim__ship_store_key",
+                  "order_fact__via__order_fact__to__store_dim__square_footage",
+                  "order_fact__via__order_fact__to__store_dim__annual_lease_cost",
+                  "order_fact__via__order_fact__to__store_dim__store_is_active",
+                  "order_fact__via__order_fact__to__store_dim__has_cafe",
+                  "order_fact__via__order_fact__to__store_dim__has_curbside",
+                  "order_fact__via__order_fact__to__store_dim__store_key",
+                  "order_fact__via__order_fact__to__store_dim__store_id",
+                  "order_fact__via__order_fact__to__store_dim__store_name",
+                  "order_fact__via__order_fact__to__store_dim__store_type",
+                  "order_fact__via__order_fact__to__store_dim__store_city",
+                  "order_fact__via__order_fact__to__store_dim__store_state",
+                  "order_fact__via__order_fact__to__store_dim__store_region",
+                  "order_fact__via__order_fact__to__store_dim__district",
+                  "order_fact__via__order_fact__to__store_dim__open_date",
+                  "order_fact__via__order_fact__to__store_dim__close_date",
+                  "order_fact__via__order_fact__to__store_dim__manager_name",
+                  "order_fact__via__order_fact__to__store_dim__store_phone"
+                ]
+              },
+              {
+                "id": "order_fact__via__order_fact__to__store_dim__2",
+                "kind": "table",
+                "name": "ORDER_FACT (via Order To Ship Store)",
+                "description": "ORDER_FACT joined only through Order To Ship Store. Metrics here follow Snowflake's USING (ORDER_TO_SHIP_STORE) path — slice them by this element's columns.",
+                "source": {
+                  "kind": "table",
+                  "elementId": "order_fact"
+                },
+                "columns": [
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__quantity_ordered",
+                    "formula": "[ORDER_FACT/Quantity Ordered]",
+                    "name": "Quantity Ordered"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__quantity_returned",
+                    "formula": "[ORDER_FACT/Quantity Returned]",
+                    "name": "Quantity Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__unit_price",
+                    "formula": "[ORDER_FACT/Unit Price]",
+                    "name": "Unit Price"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__unit_cost",
+                    "formula": "[ORDER_FACT/Unit Cost]",
+                    "name": "Unit Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__discount_amount",
+                    "formula": "[ORDER_FACT/Discount Amount]",
+                    "name": "Discount Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__shipping_amount",
+                    "formula": "[ORDER_FACT/Shipping Amount]",
+                    "name": "Shipping Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__tax_amount",
+                    "formula": "[ORDER_FACT/Tax Amount]",
+                    "name": "Tax Amount"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__gross_revenue",
+                    "formula": "[ORDER_FACT/Gross Revenue]",
+                    "name": "Gross Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__net_revenue",
+                    "formula": "[ORDER_FACT/Net Revenue]",
+                    "name": "Net Revenue"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__gross_profit",
+                    "formula": "[ORDER_FACT/Gross Profit]",
+                    "name": "Gross Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__net_profit",
+                    "formula": "[ORDER_FACT/Net Profit]",
+                    "name": "Net Profit"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__days_to_ship",
+                    "formula": "[ORDER_FACT/Days To Ship]",
+                    "name": "Days To Ship"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__is_first_order",
+                    "formula": "[ORDER_FACT/Is First Order]",
+                    "name": "Is First Order"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__is_returned",
+                    "formula": "[ORDER_FACT/Is Returned]",
+                    "name": "Is Returned"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__is_cancelled",
+                    "formula": "[ORDER_FACT/Is Cancelled]",
+                    "name": "Is Cancelled"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_id",
+                    "formula": "[ORDER_FACT/Order Id]",
+                    "name": "Order Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_line",
+                    "formula": "[ORDER_FACT/Order Line]",
+                    "name": "Order Line"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_channel",
+                    "formula": "[ORDER_FACT/Order Channel]",
+                    "name": "Order Channel"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__ship_method",
+                    "formula": "[ORDER_FACT/Ship Method]",
+                    "name": "Ship Method"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_status",
+                    "formula": "[ORDER_FACT/Order Status]",
+                    "name": "Order Status"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__customer_key",
+                    "formula": "[ORDER_FACT/Customer Key]",
+                    "name": "Customer Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_date_key",
+                    "formula": "[ORDER_FACT/Order Date Key]",
+                    "name": "Order Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__ship_date_key",
+                    "formula": "[ORDER_FACT/Ship Date Key]",
+                    "name": "Ship Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__return_date_key",
+                    "formula": "[ORDER_FACT/Return Date Key]",
+                    "name": "Return Date Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__product_key",
+                    "formula": "[ORDER_FACT/Product Key]",
+                    "name": "Product Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__promo_key",
+                    "formula": "[ORDER_FACT/Promo Key]",
+                    "name": "Promo Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__order_store_key",
+                    "formula": "[ORDER_FACT/Order Store Key]",
+                    "name": "Order Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__ship_store_key",
+                    "formula": "[ORDER_FACT/Ship Store Key]",
+                    "name": "Ship Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__square_footage",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Square Footage]",
+                    "name": "Square Footage"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__annual_lease_cost",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Annual Lease Cost]",
+                    "name": "Annual Lease Cost"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_is_active",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Is Active]",
+                    "name": "Store Is Active"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__has_cafe",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Has Cafe]",
+                    "name": "Has Cafe"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__has_curbside",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Has Curbside]",
+                    "name": "Has Curbside"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_key",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Key]",
+                    "name": "Store Key"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_id",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Id]",
+                    "name": "Store Id"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_name",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Name]",
+                    "name": "Store Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_type",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Type]",
+                    "name": "Store Type"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_city",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store City]",
+                    "name": "Store City"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_state",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store State]",
+                    "name": "Store State"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_region",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Region]",
+                    "name": "Store Region"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__district",
+                    "formula": "[ORDER_FACT/Order To Ship Store/District]",
+                    "name": "District"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__open_date",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Open Date]",
+                    "name": "Open Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__close_date",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Close Date]",
+                    "name": "Close Date"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__manager_name",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Manager Name]",
+                    "name": "Manager Name"
+                  },
+                  {
+                    "id": "order_fact__via__order_fact__to__store_dim__2__store_phone",
+                    "formula": "[ORDER_FACT/Order To Ship Store/Store Phone]",
+                    "name": "Store Phone"
+                  }
+                ],
+                "metrics": [
+                  {
+                    "id": "order_fact__m__total_gross_revenue_by_ship_store",
+                    "formula": "Sum([Gross Revenue])",
+                    "name": "Total Gross Revenue By Ship Store"
+                  },
+                  {
+                    "id": "order_fact__m__order_line_count_by_ship_store",
+                    "formula": "Count()",
+                    "name": "Order Line Count By Ship Store"
+                  }
+                ],
+                "order": [
+                  "order_fact__via__order_fact__to__store_dim__2__quantity_ordered",
+                  "order_fact__via__order_fact__to__store_dim__2__quantity_returned",
+                  "order_fact__via__order_fact__to__store_dim__2__unit_price",
+                  "order_fact__via__order_fact__to__store_dim__2__unit_cost",
+                  "order_fact__via__order_fact__to__store_dim__2__discount_amount",
+                  "order_fact__via__order_fact__to__store_dim__2__shipping_amount",
+                  "order_fact__via__order_fact__to__store_dim__2__tax_amount",
+                  "order_fact__via__order_fact__to__store_dim__2__gross_revenue",
+                  "order_fact__via__order_fact__to__store_dim__2__net_revenue",
+                  "order_fact__via__order_fact__to__store_dim__2__gross_profit",
+                  "order_fact__via__order_fact__to__store_dim__2__net_profit",
+                  "order_fact__via__order_fact__to__store_dim__2__days_to_ship",
+                  "order_fact__via__order_fact__to__store_dim__2__is_first_order",
+                  "order_fact__via__order_fact__to__store_dim__2__is_returned",
+                  "order_fact__via__order_fact__to__store_dim__2__is_cancelled",
+                  "order_fact__via__order_fact__to__store_dim__2__order_id",
+                  "order_fact__via__order_fact__to__store_dim__2__order_line",
+                  "order_fact__via__order_fact__to__store_dim__2__order_channel",
+                  "order_fact__via__order_fact__to__store_dim__2__ship_method",
+                  "order_fact__via__order_fact__to__store_dim__2__order_status",
+                  "order_fact__via__order_fact__to__store_dim__2__customer_key",
+                  "order_fact__via__order_fact__to__store_dim__2__order_date_key",
+                  "order_fact__via__order_fact__to__store_dim__2__ship_date_key",
+                  "order_fact__via__order_fact__to__store_dim__2__return_date_key",
+                  "order_fact__via__order_fact__to__store_dim__2__product_key",
+                  "order_fact__via__order_fact__to__store_dim__2__promo_key",
+                  "order_fact__via__order_fact__to__store_dim__2__order_store_key",
+                  "order_fact__via__order_fact__to__store_dim__2__ship_store_key",
+                  "order_fact__via__order_fact__to__store_dim__2__square_footage",
+                  "order_fact__via__order_fact__to__store_dim__2__annual_lease_cost",
+                  "order_fact__via__order_fact__to__store_dim__2__store_is_active",
+                  "order_fact__via__order_fact__to__store_dim__2__has_cafe",
+                  "order_fact__via__order_fact__to__store_dim__2__has_curbside",
+                  "order_fact__via__order_fact__to__store_dim__2__store_key",
+                  "order_fact__via__order_fact__to__store_dim__2__store_id",
+                  "order_fact__via__order_fact__to__store_dim__2__store_name",
+                  "order_fact__via__order_fact__to__store_dim__2__store_type",
+                  "order_fact__via__order_fact__to__store_dim__2__store_city",
+                  "order_fact__via__order_fact__to__store_dim__2__store_state",
+                  "order_fact__via__order_fact__to__store_dim__2__store_region",
+                  "order_fact__via__order_fact__to__store_dim__2__district",
+                  "order_fact__via__order_fact__to__store_dim__2__open_date",
+                  "order_fact__via__order_fact__to__store_dim__2__close_date",
+                  "order_fact__via__order_fact__to__store_dim__2__manager_name",
+                  "order_fact__via__order_fact__to__store_dim__2__store_phone"
+                ]
+              },
+              {
+                "id": "customer_dim",
+                "kind": "table",
+                "description": "Customer dimension with demographics and lifetime metrics",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "CUSTOMER_DIM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "customer_dim__lifetime_order_count",
+                    "formula": "[CUSTOMER_DIM/Lifetime Order Count]"
+                  },
+                  {
+                    "id": "customer_dim__lifetime_revenue",
+                    "formula": "[CUSTOMER_DIM/Lifetime Revenue]"
+                  },
+                  {
+                    "id": "customer_dim__is_active",
+                    "formula": "[CUSTOMER_DIM/Is Active]"
+                  },
+                  {
+                    "id": "customer_dim__is_email_opt_in",
+                    "formula": "[CUSTOMER_DIM/Is Email Opt In]"
+                  },
+                  {
+                    "id": "customer_dim__customer_key",
+                    "formula": "[CUSTOMER_DIM/Customer Key]"
+                  },
+                  {
+                    "id": "customer_dim__customer_id",
+                    "formula": "[CUSTOMER_DIM/Customer Id]"
+                  },
+                  {
+                    "id": "customer_dim__first_name",
+                    "formula": "[CUSTOMER_DIM/First Name]"
+                  },
+                  {
+                    "id": "customer_dim__last_name",
+                    "formula": "[CUSTOMER_DIM/Last Name]"
+                  },
+                  {
+                    "id": "customer_dim__email",
+                    "formula": "[CUSTOMER_DIM/Email]"
+                  },
+                  {
+                    "id": "customer_dim__phone",
+                    "formula": "[CUSTOMER_DIM/Phone]"
+                  },
+                  {
+                    "id": "customer_dim__city",
+                    "formula": "[CUSTOMER_DIM/City]",
+                    "name": "Cust City"
+                  },
+                  {
+                    "id": "customer_dim__state",
+                    "formula": "[CUSTOMER_DIM/State]",
+                    "name": "Cust State"
+                  },
+                  {
+                    "id": "customer_dim__zip_code",
+                    "formula": "[CUSTOMER_DIM/Zip Code]"
+                  },
+                  {
+                    "id": "customer_dim__region",
+                    "formula": "[CUSTOMER_DIM/Region]",
+                    "name": "Cust Region"
+                  },
+                  {
+                    "id": "customer_dim__customer_segment",
+                    "formula": "[CUSTOMER_DIM/Customer Segment]"
+                  },
+                  {
+                    "id": "customer_dim__loyalty_tier",
+                    "formula": "[CUSTOMER_DIM/Loyalty Tier]"
+                  },
+                  {
+                    "id": "customer_dim__acquisition_channel",
+                    "formula": "[CUSTOMER_DIM/Acquisition Channel]"
+                  },
+                  {
+                    "id": "customer_dim__first_order_date",
+                    "formula": "[CUSTOMER_DIM/First Order Date]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "customer_dim__customer_key"
+                ],
+                "order": [
+                  "customer_dim__lifetime_order_count",
+                  "customer_dim__lifetime_revenue",
+                  "customer_dim__is_active",
+                  "customer_dim__is_email_opt_in",
+                  "customer_dim__customer_key",
+                  "customer_dim__customer_id",
+                  "customer_dim__first_name",
+                  "customer_dim__last_name",
+                  "customer_dim__email",
+                  "customer_dim__phone",
+                  "customer_dim__city",
+                  "customer_dim__state",
+                  "customer_dim__zip_code",
+                  "customer_dim__region",
+                  "customer_dim__customer_segment",
+                  "customer_dim__loyalty_tier",
+                  "customer_dim__acquisition_channel",
+                  "customer_dim__first_order_date"
+                ]
+              },
+              {
+                "id": "product_dim",
+                "kind": "table",
+                "description": "Product dimension with catalog attributes",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "PRODUCT_DIM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "product_dim__unit_cost",
+                    "formula": "[PRODUCT_DIM/Unit Cost]",
+                    "name": "Prod Unit Cost"
+                  },
+                  {
+                    "id": "product_dim__unit_price",
+                    "formula": "[PRODUCT_DIM/Unit Price]",
+                    "name": "Prod Unit Price"
+                  },
+                  {
+                    "id": "product_dim__weight_lbs",
+                    "formula": "[PRODUCT_DIM/Weight Lbs]"
+                  },
+                  {
+                    "id": "product_dim__is_active",
+                    "formula": "[PRODUCT_DIM/Is Active]",
+                    "name": "Prod Is Active"
+                  },
+                  {
+                    "id": "product_dim__is_private_label",
+                    "formula": "[PRODUCT_DIM/Is Private Label]"
+                  },
+                  {
+                    "id": "product_dim__is_seasonal",
+                    "formula": "[PRODUCT_DIM/Is Seasonal]"
+                  },
+                  {
+                    "id": "product_dim__product_key",
+                    "formula": "[PRODUCT_DIM/Product Key]"
+                  },
+                  {
+                    "id": "product_dim__product_id",
+                    "formula": "[PRODUCT_DIM/Product Id]"
+                  },
+                  {
+                    "id": "product_dim__product_name",
+                    "formula": "[PRODUCT_DIM/Product Name]"
+                  },
+                  {
+                    "id": "product_dim__category",
+                    "formula": "[PRODUCT_DIM/Category]"
+                  },
+                  {
+                    "id": "product_dim__subcategory",
+                    "formula": "[PRODUCT_DIM/Subcategory]"
+                  },
+                  {
+                    "id": "product_dim__brand",
+                    "formula": "[PRODUCT_DIM/Brand]"
+                  },
+                  {
+                    "id": "product_dim__launch_date",
+                    "formula": "[PRODUCT_DIM/Launch Date]"
+                  },
+                  {
+                    "id": "product_dim__discontinue_date",
+                    "formula": "[PRODUCT_DIM/Discontinue Date]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "product_dim__product_key"
+                ],
+                "order": [
+                  "product_dim__unit_cost",
+                  "product_dim__unit_price",
+                  "product_dim__weight_lbs",
+                  "product_dim__is_active",
+                  "product_dim__is_private_label",
+                  "product_dim__is_seasonal",
+                  "product_dim__product_key",
+                  "product_dim__product_id",
+                  "product_dim__product_name",
+                  "product_dim__category",
+                  "product_dim__subcategory",
+                  "product_dim__brand",
+                  "product_dim__launch_date",
+                  "product_dim__discontinue_date"
+                ]
+              },
+              {
+                "id": "store_dim",
+                "kind": "table",
+                "description": "Store dimension for order placement and fulfillment locations",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "STORE_DIM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "store_dim__square_footage",
+                    "formula": "[STORE_DIM/Square Footage]"
+                  },
+                  {
+                    "id": "store_dim__annual_lease_cost",
+                    "formula": "[STORE_DIM/Annual Lease Cost]"
+                  },
+                  {
+                    "id": "store_dim__is_active",
+                    "formula": "[STORE_DIM/Is Active]",
+                    "name": "Store Is Active"
+                  },
+                  {
+                    "id": "store_dim__has_cafe",
+                    "formula": "[STORE_DIM/Has Cafe]"
+                  },
+                  {
+                    "id": "store_dim__has_curbside",
+                    "formula": "[STORE_DIM/Has Curbside]"
+                  },
+                  {
+                    "id": "store_dim__store_key",
+                    "formula": "[STORE_DIM/Store Key]"
+                  },
+                  {
+                    "id": "store_dim__store_id",
+                    "formula": "[STORE_DIM/Store Id]"
+                  },
+                  {
+                    "id": "store_dim__store_name",
+                    "formula": "[STORE_DIM/Store Name]"
+                  },
+                  {
+                    "id": "store_dim__store_type",
+                    "formula": "[STORE_DIM/Store Type]"
+                  },
+                  {
+                    "id": "store_dim__city",
+                    "formula": "[STORE_DIM/City]",
+                    "name": "Store City"
+                  },
+                  {
+                    "id": "store_dim__state",
+                    "formula": "[STORE_DIM/State]",
+                    "name": "Store State"
+                  },
+                  {
+                    "id": "store_dim__region",
+                    "formula": "[STORE_DIM/Region]",
+                    "name": "Store Region"
+                  },
+                  {
+                    "id": "store_dim__district",
+                    "formula": "[STORE_DIM/District]"
+                  },
+                  {
+                    "id": "store_dim__open_date",
+                    "formula": "[STORE_DIM/Open Date]"
+                  },
+                  {
+                    "id": "store_dim__close_date",
+                    "formula": "[STORE_DIM/Close Date]"
+                  },
+                  {
+                    "id": "store_dim__manager_name",
+                    "formula": "[STORE_DIM/Manager Name]"
+                  },
+                  {
+                    "id": "store_dim__store_phone",
+                    "formula": "[STORE_DIM/Store Phone]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "store_dim__store_key"
+                ],
+                "order": [
+                  "store_dim__square_footage",
+                  "store_dim__annual_lease_cost",
+                  "store_dim__is_active",
+                  "store_dim__has_cafe",
+                  "store_dim__has_curbside",
+                  "store_dim__store_key",
+                  "store_dim__store_id",
+                  "store_dim__store_name",
+                  "store_dim__store_type",
+                  "store_dim__city",
+                  "store_dim__state",
+                  "store_dim__region",
+                  "store_dim__district",
+                  "store_dim__open_date",
+                  "store_dim__close_date",
+                  "store_dim__manager_name",
+                  "store_dim__store_phone"
+                ]
+              },
+              {
+                "id": "date_dim",
+                "kind": "table",
+                "description": "Date dimension for order, ship, and return dates",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "DATE_DIM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "date_dim__day_of_month",
+                    "formula": "[DATE_DIM/Day Of Month]"
+                  },
+                  {
+                    "id": "date_dim__week_of_year",
+                    "formula": "[DATE_DIM/Week Of Year]"
+                  },
+                  {
+                    "id": "date_dim__month_number",
+                    "formula": "[DATE_DIM/Month Number]"
+                  },
+                  {
+                    "id": "date_dim__quarter",
+                    "formula": "[DATE_DIM/Quarter]"
+                  },
+                  {
+                    "id": "date_dim__year",
+                    "formula": "[DATE_DIM/Year]"
+                  },
+                  {
+                    "id": "date_dim__is_weekend",
+                    "formula": "[DATE_DIM/Is Weekend]"
+                  },
+                  {
+                    "id": "date_dim__is_holiday",
+                    "formula": "[DATE_DIM/Is Holiday]"
+                  },
+                  {
+                    "id": "date_dim__date_key",
+                    "formula": "[DATE_DIM/Date Key]"
+                  },
+                  {
+                    "id": "date_dim__full_date",
+                    "formula": "[DATE_DIM/Full Date]"
+                  },
+                  {
+                    "id": "date_dim__day_of_week",
+                    "formula": "[DATE_DIM/Day Of Week]"
+                  },
+                  {
+                    "id": "date_dim__month_name",
+                    "formula": "[DATE_DIM/Month Name]"
+                  },
+                  {
+                    "id": "date_dim__fiscal_period",
+                    "formula": "[DATE_DIM/Fiscal Period]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "date_dim__date_key"
+                ],
+                "order": [
+                  "date_dim__day_of_month",
+                  "date_dim__week_of_year",
+                  "date_dim__month_number",
+                  "date_dim__quarter",
+                  "date_dim__year",
+                  "date_dim__is_weekend",
+                  "date_dim__is_holiday",
+                  "date_dim__date_key",
+                  "date_dim__full_date",
+                  "date_dim__day_of_week",
+                  "date_dim__month_name",
+                  "date_dim__fiscal_period"
+                ]
+              },
+              {
+                "id": "promo_dim",
+                "kind": "table",
+                "description": "Promotion dimension with discount and campaign details",
+                "source": {
+                  "connectionId": "00000000-0000-4000-8000-000000000000",
+                  "kind": "warehouse-table",
+                  "path": [
+                    "CSA",
+                    "TJ",
+                    "PROMO_DIM"
+                  ]
+                },
+                "columns": [
+                  {
+                    "id": "promo_dim__discount_pct",
+                    "formula": "[PROMO_DIM/Discount Pct]"
+                  },
+                  {
+                    "id": "promo_dim__promo_cost",
+                    "formula": "[PROMO_DIM/Promo Cost]"
+                  },
+                  {
+                    "id": "promo_dim__min_order_amount",
+                    "formula": "[PROMO_DIM/Min Order Amount]"
+                  },
+                  {
+                    "id": "promo_dim__is_stackable",
+                    "formula": "[PROMO_DIM/Is Stackable]"
+                  },
+                  {
+                    "id": "promo_dim__promo_key",
+                    "formula": "[PROMO_DIM/Promo Key]"
+                  },
+                  {
+                    "id": "promo_dim__promo_id",
+                    "formula": "[PROMO_DIM/Promo Id]"
+                  },
+                  {
+                    "id": "promo_dim__promo_name",
+                    "formula": "[PROMO_DIM/Promo Name]"
+                  },
+                  {
+                    "id": "promo_dim__promo_type",
+                    "formula": "[PROMO_DIM/Promo Type]"
+                  },
+                  {
+                    "id": "promo_dim__channel",
+                    "formula": "[PROMO_DIM/Channel]"
+                  },
+                  {
+                    "id": "promo_dim__start_date",
+                    "formula": "[PROMO_DIM/Start Date]"
+                  },
+                  {
+                    "id": "promo_dim__end_date",
+                    "formula": "[PROMO_DIM/End Date]"
+                  },
+                  {
+                    "id": "promo_dim__target_segment",
+                    "formula": "[PROMO_DIM/Target Segment]"
+                  }
+                ],
+                "uniqueKeys": [
+                  "promo_dim__promo_key"
+                ],
+                "order": [
+                  "promo_dim__discount_pct",
+                  "promo_dim__promo_cost",
+                  "promo_dim__min_order_amount",
+                  "promo_dim__is_stackable",
+                  "promo_dim__promo_key",
+                  "promo_dim__promo_id",
+                  "promo_dim__promo_name",
+                  "promo_dim__promo_type",
+                  "promo_dim__channel",
+                  "promo_dim__start_date",
+                  "promo_dim__end_date",
+                  "promo_dim__target_segment"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "findingCodes": [
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "METRIC_JOIN_PATH_SELECTOR",
+        "COLUMN_TYPES_SKIPPED",
+        "USING_METRICS_PATH_BOUND"
+      ]
+    }
+  ]
+}
