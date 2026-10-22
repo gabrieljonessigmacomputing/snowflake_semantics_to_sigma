@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: sigmacomputing/snowflake_semantics_to_sigma@v1
+      - uses: twells89/snowflake_semantics_to_sigma@v1
         with:
           sigma_base_url: ${{ vars.SIGMA_BASE_URL }}
           sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
