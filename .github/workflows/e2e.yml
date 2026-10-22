@@ -52,16 +52,40 @@ jobs:
           mode: auto
           model_name_template: 'E2E {view} ${{ github.run_id }}'
           commit_mode: none
+      - name: Lose the lockfile
+        if: env.HAVE_SECRETS == 'true'
+        run: |
+          cp sigma/semantic-views.lock.json "$RUNNER_TEMP/first.lock.json"
+          rm sigma/semantic-views.lock.json
+      - name: Third sync (adopts the existing model; uploads the state artifact)
+        id: third
+        if: env.HAVE_SECRETS == 'true'
+        uses: ./
+        with:
+          sigma_base_url: ${{ secrets.SIGMA_BASE_URL }}
+          sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
+          sigma_client_secret: ${{ secrets.SIGMA_CLIENT_SECRET }}
+          connection_id: ${{ secrets.SIGMA_E2E_CONNECTION_ID }}
+          folder_id: ${{ secrets.SIGMA_E2E_FOLDER_ID }}
+          paths: test/e2e/fixtures/**/*.yaml
+          database: CSA
+          schema: TJ
+          mode: all
+          adopt_existing: true
+          model_name_template: 'E2E {view} ${{ github.run_id }}'
+          commit_mode: none
       - name: Assert
         if: env.HAVE_SECRETS == 'true'
         run: |
           test '${{ steps.first.outputs.created }}' = '["CSA.TJ.RETAIL_ANALYTICS_SEMANTIC_VIEW"]'
           test '${{ steps.second.outputs.created }}' = '[]'
           test '${{ steps.second.outputs.updated }}' = '[]'
+          test '${{ steps.third.outputs.created }}' = '[]'
+          test '${{ steps.third.outputs.updated }}' = '["CSA.TJ.RETAIL_ANALYTICS_SEMANTIC_VIEW"]'
       - name: Clean up
         if: always() && env.HAVE_SECRETS == 'true'
         env:
           SIGMA_BASE_URL: ${{ secrets.SIGMA_BASE_URL }}
           SIGMA_CLIENT_ID: ${{ secrets.SIGMA_CLIENT_ID }}
           SIGMA_CLIENT_SECRET: ${{ secrets.SIGMA_CLIENT_SECRET }}
-        run: node scripts/e2e-cleanup.mjs sigma/semantic-views.lock.json
+        run: node scripts/e2e-cleanup.mjs "$RUNNER_TEMP/first.lock.json" sigma/semantic-views.lock.json
