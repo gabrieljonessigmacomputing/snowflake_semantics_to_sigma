@@ -1,0 +1,67 @@
+name: e2e
+
+# Runs the action against a real Sigma org. Not a required check: it needs
+# secrets (absent on forks) and creates, then deletes, real data models.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      HAVE_SECRETS: ${{ secrets.SIGMA_CLIENT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip without secrets
+        if: env.HAVE_SECRETS != 'true'
+        run: echo "::notice::Sigma e2e secrets not configured; skipping"
+      - name: First sync (creates)
+        id: first
+        if: env.HAVE_SECRETS == 'true'
+        uses: ./
+        with:
+          sigma_base_url: ${{ secrets.SIGMA_BASE_URL }}
+          sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
+          sigma_client_secret: ${{ secrets.SIGMA_CLIENT_SECRET }}
+          connection_id: ${{ secrets.SIGMA_E2E_CONNECTION_ID }}
+          folder_id: ${{ secrets.SIGMA_E2E_FOLDER_ID }}
+          paths: test/e2e/fixtures/**/*.yaml
+          database: CSA
+          schema: TJ
+          mode: all
+          model_name_template: 'E2E {view} ${{ github.run_id }}'
+          commit_mode: none
+      - name: Second sync (idempotent)
+        id: second
+        if: env.HAVE_SECRETS == 'true'
+        uses: ./
+        with:
+          sigma_base_url: ${{ secrets.SIGMA_BASE_URL }}
+          sigma_client_id: ${{ secrets.SIGMA_CLIENT_ID }}
+          sigma_client_secret: ${{ secrets.SIGMA_CLIENT_SECRET }}
+          connection_id: ${{ secrets.SIGMA_E2E_CONNECTION_ID }}
+          folder_id: ${{ secrets.SIGMA_E2E_FOLDER_ID }}
+          paths: test/e2e/fixtures/**/*.yaml
+          database: CSA
+          schema: TJ
+          mode: auto
+          model_name_template: 'E2E {view} ${{ github.run_id }}'
+          commit_mode: none
+      - name: Assert
+        if: env.HAVE_SECRETS == 'true'
+        run: |
+          test '${{ steps.first.outputs.created }}' = '["CSA.TJ.RETAIL_ANALYTICS_SEMANTIC_VIEW"]'
+          test '${{ steps.second.outputs.created }}' = '[]'
+          test '${{ steps.second.outputs.updated }}' = '[]'
+      - name: Clean up
+        if: always() && env.HAVE_SECRETS == 'true'
+        env:
+          SIGMA_BASE_URL: ${{ secrets.SIGMA_BASE_URL }}
+          SIGMA_CLIENT_ID: ${{ secrets.SIGMA_CLIENT_ID }}
+          SIGMA_CLIENT_SECRET: ${{ secrets.SIGMA_CLIENT_SECRET }}
+        run: node scripts/e2e-cleanup.mjs sigma/semantic-views.lock.json
