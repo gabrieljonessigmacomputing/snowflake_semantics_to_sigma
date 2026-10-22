@@ -81,8 +81,13 @@ test('editing one file updates only its views', async () => {
   const s = new FakeSigma();
   await run(config(), deps(dir, s).d);
   appendFileSync(join(dir, 'views/tpch.yaml'), '\n# edited\n');
+  const tpchId = lockOf(dir).views[TPCH].dataModelId;
+  const live = s.liveIds(tpchId);
   const r = await run(config(), deps(dir, s).d);
   assert.deepEqual(statusOf(r), { [SALES]: 'unchanged', [TPCH]: 'updated' });
+  const put = s.calls.find(c => c.op === 'update' && c.id === tpchId)!.body as any;
+  const { collectIds } = await import('./helpers/server-remap.js');
+  assert.deepEqual(collectIds(put).filter(id => !live.has(id)), [], 'an unchanged view keeps every live id');
 });
 
 test('deleted file reports orphan and never calls deleteFile', async () => {

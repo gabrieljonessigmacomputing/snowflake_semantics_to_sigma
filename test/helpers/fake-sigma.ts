@@ -1,6 +1,7 @@
 // In-memory Sigma for orchestration tests: just enough of SigmaClient's surface.
 import type { DataModelColumn } from '../../src/sigma/client.js';
 import type { RunClient } from '../../src/run.js';
+import { collectIds, serverRemap } from './server-remap.js';
 
 export class FakeSigma implements RunClient {
   models = new Map<string, { name: string; folderId: string; spec: Record<string, unknown> }>();
@@ -21,7 +22,8 @@ export class FakeSigma implements RunClient {
   async createDataModel(spec: Record<string, unknown>, name: string, folderId: string) {
     this.calls.push({ op: 'create', body: { spec, name, folderId } });
     const id = `dm-${++this.n}`;
-    this.models.set(id, { name, folderId, spec: structuredClone(spec) });
+    // Like Sigma: every submitted id is remapped to a server id.
+    this.models.set(id, { name, folderId, spec: { ...serverRemap(spec, { addNames: true, prefix: `${id}_` }), name, folderId } });
     return id;
   }
   async updateDataModel(id: string, spec: Record<string, unknown>) {
@@ -34,5 +36,6 @@ export class FakeSigma implements RunClient {
     this.calls.push({ op: 'columns', id });
     return [{ elementId: 'e', columnId: 'c', label: 'X', formula: '[X]', type: this.errorColumnsFor.has(id) ? 'error' : 'number' }];
   }
+  liveIds(id: string) { return new Set(collectIds(this.models.get(id)!.spec)); }
   writes() { return this.calls.filter(c => ['create', 'update', 'delete'].includes(c.op)); }
 }

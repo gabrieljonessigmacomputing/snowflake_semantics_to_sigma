@@ -10,6 +10,7 @@ import type { Decision } from './decide.js';
 import type { ViewSource } from './discover.js';
 import { keyFileName } from './identity.js';
 import { canonicalSha256, type LockEntry } from './lock.js';
+import { preserveIds } from './preserve-ids.js';
 import type { SigmaClient } from './sigma/client.js';
 
 export type SigmaWriter = Pick<SigmaClient, 'getDataModelSpec' | 'createDataModel' | 'updateDataModel' | 'deleteFile' | 'listDataModelColumns'>;
@@ -103,7 +104,13 @@ export async function executeView(client: SigmaWriter | undefined, args: Execute
     out.drift = drift;
     if (drift || decision.kind === 'adopt') savePre(args.preUpdateDir, view.key, pre);
 
-    await client.updateDataModel(id, args.spec);
+    // Keep the live element/column ids (workbooks depend on them) and the model's name and folder.
+    const body: Record<string, unknown> = {
+      ...preserveIds(args.spec, pre).spec,
+      ...(pre.name !== undefined && { name: pre.name }),
+      ...(pre.folderId !== undefined && { folderId: pre.folderId }),
+    };
+    await client.updateDataModel(id, body);
     const bad = await errorColumns(client, id);
     if (bad.length > 0) {
       try {

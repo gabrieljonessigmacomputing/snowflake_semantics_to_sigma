@@ -158,3 +158,18 @@ test('refusals pass through', async () => {
   assert.match(r2.error!, /adopt_existing/);
   assert.deepEqual(s.calls, []);
 });
+
+test('update PUTs the live ids for unchanged objects and carries name and folderId', async () => {
+  const { serverRemap } = await import('./helpers/server-remap.js');
+  const { readFileSync } = await import('node:fs');
+  const golden = JSON.parse(readFileSync(new URL('./golden/star_schema_ddl_sql.json', import.meta.url), 'utf8'));
+  const { name: _n, ...fresh } = golden.results[0].model;
+  const s = new FakeSigma();
+  s.models.set('dm1', { ...serverRemap(fresh, { addNames: true }), name: 'SALES_VIEW', folderId: 'fld-9' });
+  const o = await executeView(s, base({ kind: 'update', dataModelId: 'dm1' }, { spec: fresh, lockEntry: lockFor(s, 'dm1') }));
+  assert.equal(o.status, 'updated');
+  const put = s.calls.find(c => c.op === 'update')!.body as any;
+  assert.deepEqual(put.pages, serverRemap(fresh).pages);
+  assert.equal(put.name, 'SALES_VIEW');
+  assert.equal(put.folderId, 'fld-9');
+});
