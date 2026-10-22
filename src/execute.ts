@@ -9,7 +9,7 @@ import type { EmbedFinding } from './convert.js';
 import type { Decision } from './decide.js';
 import type { ViewSource } from './discover.js';
 import { keyFileName } from './identity.js';
-import { canonicalSha256, type LockEntry } from './lock.js';
+import { SPEC_HASH_VERSION, specHash, type LockEntry } from './lock.js';
 import { preserveIds } from './preserve-ids.js';
 import { SigmaApiError, type SigmaClient } from './sigma/client.js';
 
@@ -40,7 +40,7 @@ export interface ExecuteArgs {
   spec?: Record<string, unknown>;
   modelName: string;
   folderId?: string;
-  lockEntry?: Pick<LockEntry, 'dataModelId' | 'specSha256'>;
+  lockEntry?: Pick<LockEntry, 'dataModelId' | 'specSha256' | 'specHashVersion'>;
   findings: EmbedFinding[];
   dryRun: boolean;
   /** Where pre-update specs are saved (drift / adopt) for the run artifact. */
@@ -127,7 +127,7 @@ async function create(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome):
   }
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, warnings, status: 'created', dataModelId: id, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, warnings, status: 'created', dataModelId: id, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
     // fall through: created and verified, just not read back
   }
@@ -145,8 +145,9 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
     return { ...out, error: message(e) };
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
-  const known = args.lockEntry?.specSha256;
-  const drift = kind === 'update' && !!known && canonicalSha256(pre) !== known;
+  // A hash from an older lock format (no specHashVersion) can't be compared: treat drift as unknown.
+  const known = args.lockEntry?.specHashVersion === SPEC_HASH_VERSION ? args.lockEntry.specSha256 : '';
+  const drift = kind === 'update' && !!known && specHash(pre) !== known;
   out.drift = drift;
   if (drift || kind === 'adopt') savePre(args.preUpdateDir, args.view.key, pre);
 
@@ -159,10 +160,18 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
   let failure: { error: string; errorColumns?: ViewOutcome['errorColumns'] } | undefined;
   try {
     await client.updateDataModel(id, body);
-    const bad = await errorColumns(client, id);
-    if (bad.length > 0) failure = { error: `${bad.length} column(s) did not resolve`, errorColumns: bad };
   } catch (e) {
-    failure = { error: `the update or its column check failed (${message(e)})` };
+    // Sigma refused the spec outright (4xx): nothing was applied, so there is nothing to roll back.
+    if (!ambiguous(e)) return { ...out, error: `Sigma rejected the update, so the live spec is unchanged: ${message(e)}` };
+    failure = { error: `the update failed (${message(e)})` };
+  }
+  if (!failure) {
+    try {
+      const bad = await errorColumns(client, id);
+      if (bad.length > 0) failure = { error: `${bad.length} column(s) did not resolve`, errorColumns: bad };
+    } catch (e) {
+      failure = { error: `the column check could not run (${message(e)})` };
+    }
   }
   if (failure) {
     try {
@@ -175,7 +184,7 @@ async function update(client: SigmaWriter, args: ExecuteArgs, out: ViewOutcome, 
   const status = kind === 'adopt' ? 'adopted' : 'updated';
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
     // fall through
   }

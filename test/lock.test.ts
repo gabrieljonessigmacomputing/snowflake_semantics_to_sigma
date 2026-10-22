@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readLock, writeLock, canonicalSha256, selectViews, findOrphans, LockError, type Lock, type LockEntry } from '../src/lock.js';
+import { readLock, writeLock, canonicalSha256, specHash, selectViews, findOrphans, LockError, type Lock, type LockEntry } from '../src/lock.js';
 import type { ViewSource } from '../src/discover.js';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'ssv-lock-'));
@@ -39,6 +39,14 @@ test('writeLock is stable', () => {
   assert.ok(textA.indexOf('"A.V"') < textA.indexOf('"B.V"'));
 });
 
+test('specHashVersion is optional but must be a number when present', () => {
+  const p = join(tmp(), 'lock.json');
+  writeFileSync(p, JSON.stringify({ version: 1, views: { A: { ...entry(), specHashVersion: 2 }, B: entry() } }));
+  assert.equal(readLock(p).views.A.specHashVersion, 2);
+  writeFileSync(p, JSON.stringify({ version: 1, views: { A: { ...entry(), specHashVersion: 'two' } } }));
+  assert.throws(() => readLock(p), LockError);
+});
+
 test('canonicalSha256 ignores key order', () => {
   assert.equal(canonicalSha256({ a: 1, b: { c: 2, d: 3 } }), canonicalSha256({ b: { d: 3, c: 2 }, a: 1 }));
   assert.notEqual(canonicalSha256({ a: [1, 2] }), canonicalSha256({ a: [2, 1] }));
@@ -70,4 +78,13 @@ test('a moved file with the same key and content is unchanged', () => {
 test('findOrphans lists keys missing from discovery', () => {
   const lock: Lock = { version: 1, views: { Z: entry(), A: entry(), KEEP: entry() } };
   assert.deepEqual(findOrphans([view('KEEP')], lock), ['A', 'Z']);
+});
+
+test('specHash covers the model content and ignores Sigma metadata', () => {
+  const base = { schemaVersion: 1, pages: [{ id: 'p', elements: [] }] };
+  assert.equal(
+    specHash({ ...base, documentVersion: 1, updatedAt: '2026-10-22T17:14:25Z', name: 'A', folderId: 'f1' }),
+    specHash({ ...base, documentVersion: 5, updatedAt: '2026-10-22T17:20:00Z', name: 'Renamed', folderId: 'f2' }),
+  );
+  assert.notEqual(specHash(base), specHash({ ...base, pages: [{ id: 'p', elements: [{ id: 'e' }] }] }));
 });

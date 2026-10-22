@@ -146545,6 +146545,7 @@ function readLock(path) {
     if (!e || typeof e !== "object") return fail(`entry ${key} is not an object`);
     for (const field of ENTRY_STRINGS) if (typeof e[field] !== "string") return fail(`entry ${key} has no string "${field}"`);
     if (typeof e.orphaned !== "boolean") return fail(`entry ${key} has no boolean "orphaned"`);
+    if (e.specHashVersion !== void 0 && typeof e.specHashVersion !== "number") return fail(`entry ${key} has a non-numeric "specHashVersion"`);
   }
   return lock;
 }
@@ -146563,6 +146564,10 @@ function writeLock(path, lock) {
 }
 function canonicalSha256(value) {
   return createHash("sha256").update(JSON.stringify(sortKeys(value))).digest("hex");
+}
+var SPEC_HASH_VERSION = 2;
+function specHash(spec) {
+  return canonicalSha256({ schemaVersion: spec.schemaVersion ?? null, pages: spec.pages ?? [] });
 }
 function selectViews(views, lock, ctx) {
   const selected = [];
@@ -160177,7 +160182,8 @@ import { join } from "node:path";
 
 // src/preserve-ids.ts
 var ID_KEY = /^(id|.*Id|.*Ids|order|uniqueKeys)$/;
-var norm = (s) => typeof s === "string" && s.trim() !== "" ? s.replace(/\s+/g, " ").trim() : void 0;
+var norm = (s) => typeof s === "string" && s.trim() !== "" ? s.replace(/\s+/g, " ").trim().toLowerCase() : void 0;
+var sameId = (x) => typeof x.id === "string" ? `id:${x.id}` : void 0;
 function pairBy(a, b, keys) {
   const pairs2 = [];
   const usedA = /* @__PURE__ */ new Set();
@@ -160258,12 +160264,13 @@ function preserveIds(next, live) {
   const link = (a, b) => {
     if (typeof a.id === "string" && typeof b.id === "string") map2.set(a.id, b.id);
   };
-  for (const [a, b] of pairBy(next.pages ?? [], live.pages ?? [], [(x) => norm(x.name), (_x2, i) => String(i)])) link(a, b);
+  for (const [a, b] of pairBy(next.pages ?? [], live.pages ?? [], [sameId, (x) => norm(x.name), (_x2, i) => String(i)])) link(a, b);
   const nextSig = signatures(next);
   const liveSig = signatures(live);
   const nextById = new Map(elementsOf(next).map((e) => [e.id, e]));
   const liveById = new Map(elementsOf(live).map((e) => [e.id, e]));
   const elementPairs = pairBy(elementsOf(next), elementsOf(live), [
+    sameId,
     (x) => norm(x.name) ? `${nextSig.get(x) ?? liveSig.get(x)}|${norm(x.name)}` : void 0,
     (x) => nextSig.get(x) ?? liveSig.get(x)
   ]);
@@ -160276,7 +160283,7 @@ function preserveIds(next, live) {
         const t = nextById.get(r.targetElementId) ?? liveById.get(r.targetElementId);
         return t ? nextSig.get(t) ?? liveSig.get(t) : void 0;
       };
-      for (const [x, y] of pairBy(items, liveItems, childKeys(field, targetSig))) link(x, y);
+      for (const [x, y] of pairBy(items, liveItems, [sameId, ...childKeys(field, targetSig)])) link(x, y);
     }
   }
   const liveIds = new Set(allIds(live));
@@ -160307,11 +160314,12 @@ var TOKEN_TTL_MS = 50 * 60 * 1e3;
 var MAX_ATTEMPTS = 3;
 var NOT_SENT = /* @__PURE__ */ new Set(["ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN"]);
 function detailOf(body) {
-  if (body && typeof body === "object") {
-    const r = body;
-    for (const k of ["message", "error_description", "error", "detail"]) if (typeof r[k] === "string") return r[k];
-  }
-  return void 0;
+  if (!body || typeof body !== "object") return void 0;
+  const r = body;
+  const summary2 = ["message", "error_description", "error", "detail"].map((k) => r[k]).find((v) => typeof v === "string");
+  const nested = Array.isArray(r.errors) ? r.errors.map((e) => typeof e === "string" ? e : ["summary", "message", "detail"].map((k) => e?.[k]).find((v) => typeof v === "string")).filter((v) => typeof v === "string" && v !== "") : [];
+  const parts = [summary2, nested.join("; ")].filter(Boolean);
+  return parts.length > 0 ? parts.join(": ") : void 0;
 }
 var SigmaClient = class {
   constructor(creds, deps = {}) {
@@ -160529,7 +160537,7 @@ async function create2(client, args, out) {
   }
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, warnings, status: "created", dataModelId: id, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, warnings, status: "created", dataModelId: id, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
   }
   warnings.push(`${args.view.key}: data model ${id} was created and verified but could not be read back; drift will not be checked on its next update`);
@@ -160545,8 +160553,8 @@ async function update(client, args, out, kind) {
     return { ...out, error: message(e) };
   }
   if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
-  const known = args.lockEntry?.specSha256;
-  const drift = kind === "update" && !!known && canonicalSha256(pre) !== known;
+  const known = args.lockEntry?.specHashVersion === SPEC_HASH_VERSION ? args.lockEntry.specSha256 : "";
+  const drift = kind === "update" && !!known && specHash(pre) !== known;
   out.drift = drift;
   if (drift || kind === "adopt") savePre(args.preUpdateDir, args.view.key, pre);
   const body = {
@@ -160557,10 +160565,17 @@ async function update(client, args, out, kind) {
   let failure;
   try {
     await client.updateDataModel(id, body);
-    const bad2 = await errorColumns(client, id);
-    if (bad2.length > 0) failure = { error: `${bad2.length} column(s) did not resolve`, errorColumns: bad2 };
   } catch (e) {
-    failure = { error: `the update or its column check failed (${message(e)})` };
+    if (!ambiguous(e)) return { ...out, error: `Sigma rejected the update, so the live spec is unchanged: ${message(e)}` };
+    failure = { error: `the update failed (${message(e)})` };
+  }
+  if (!failure) {
+    try {
+      const bad2 = await errorColumns(client, id);
+      if (bad2.length > 0) failure = { error: `${bad2.length} column(s) did not resolve`, errorColumns: bad2 };
+    } catch (e) {
+      failure = { error: `the column check could not run (${message(e)})` };
+    }
   }
   if (failure) {
     try {
@@ -160573,7 +160588,7 @@ async function update(client, args, out, kind) {
   const status = kind === "adopt" ? "adopted" : "updated";
   try {
     const getBack = await client.getDataModelSpec(id);
-    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: specHash(getBack) };
   } catch {
   }
   return { ...out, status, specSha256: "", warnings: [`${args.view.key}: data model ${id} was updated and verified but could not be read back; drift will not be checked on its next update`] };
@@ -160604,6 +160619,7 @@ function applyOutcomes(lock, outcomes, views, ctx, orphans) {
         optionsSha256: ctx.optionsSha256,
         engineCommit: ctx.engineCommit,
         specSha256: o.specSha256,
+        specHashVersion: SPEC_HASH_VERSION,
         lastDeployedAt: ctx.now,
         orphaned: false
       };
@@ -160951,8 +160967,8 @@ function renderSummary(r) {
   }
   const drifted = r.outcomes.filter((o) => o.drift);
   if (drifted.length > 0) {
-    out.push("", "### Drift", "", "These data models were edited in Sigma since the last sync and have been overwritten from git. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).", "");
-    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId})`);
+    out.push("", "### Drift", "", "These data models were edited in Sigma since the last sync. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).", "");
+    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId}): ${o.status === "updated" || o.status === "adopted" ? "overwritten from git" : "not changed by this run"}`);
   }
   if (r.orphans.length > 0) {
     out.push("", "### Orphaned", "", "These views are no longer defined in the repo. Their Sigma data models were **never deleted**; delete them in Sigma if they are no longer needed.", "");
@@ -160980,6 +160996,11 @@ function renderSummary(r) {
   }
   if (r.skipped.length > 0) out.push("", `<details><summary>${r.skipped.length} file(s) skipped (not semantic views)</summary>`, "", ...r.skipped.map((s) => `- ${s}`), "", "</details>");
   return out.join("\n") + "\n";
+}
+function driftWarnings(r) {
+  return r.outcomes.filter((o) => o.drift).map(
+    (o) => `${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; ` + (o.status === "updated" || o.status === "adopted" ? "overwritten from git (previous spec saved in the run artifact)" : "it was not changed by this run (previous spec saved in the run artifact)")
+  );
 }
 
 // src/main.ts
@@ -161009,7 +161030,7 @@ async function main() {
   core.setOutput("updated", keys("updated", "adopted"));
   core.setOutput("refused", keys("refused"));
   core.setOutput("orphaned", JSON.stringify(result.orphans.map((o) => o.key)));
-  for (const o of result.outcomes.filter((o2) => o2.drift)) core.warning(`${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; overwritten from git (previous spec saved in the run artifact)`);
+  for (const w of driftWarnings(result)) core.warning(w);
   for (const w of result.warnings) core.warning(w);
   await core.summary.addRaw(renderSummary(result)).write();
   if (result.exitCode === 1) {

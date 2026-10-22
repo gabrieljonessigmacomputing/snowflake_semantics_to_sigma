@@ -51,11 +51,17 @@ interface Page {
 }
 
 function detailOf(body: unknown): string | undefined {
-  if (body && typeof body === 'object') {
-    const r = body as Record<string, unknown>;
-    for (const k of ['message', 'error_description', 'error', 'detail']) if (typeof r[k] === 'string') return r[k] as string;
-  }
-  return undefined;
+  if (!body || typeof body !== 'object') return undefined;
+  const r = body as Record<string, unknown>;
+  const summary = ['message', 'error_description', 'error', 'detail'].map(k => r[k]).find((v): v is string => typeof v === 'string');
+  // Sigma puts the specific cause in errors[] (e.g. "Cannot resolve columns on table …").
+  const nested = Array.isArray(r.errors)
+    ? r.errors
+        .map(e => (typeof e === 'string' ? e : ['summary', 'message', 'detail'].map(k => (e as Record<string, unknown>)?.[k]).find(v => typeof v === 'string')))
+        .filter((v): v is string => typeof v === 'string' && v !== '')
+    : [];
+  const parts = [summary, nested.join('; ')].filter(Boolean);
+  return parts.length > 0 ? parts.join(': ') : undefined;
 }
 
 export class SigmaClient {

@@ -5,7 +5,7 @@ import * as github from '@actions/github';
 import { parseInputs } from './inputs.js';
 import { run } from './run.js';
 import { SigmaClient } from './sigma/client.js';
-import { renderSummary } from './summary.js';
+import { driftWarnings, renderSummary } from './summary.js';
 import { refreshState, uploadStateArtifact, writeBack, type OctokitLike } from './writeback.js';
 
 async function main(): Promise<void> {
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
   core.setOutput('refused', keys('refused'));
   core.setOutput('orphaned', JSON.stringify(result.orphans.map(o => o.key)));
 
-  for (const o of result.outcomes.filter(o => o.drift)) core.warning(`${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; overwritten from git (previous spec saved in the run artifact)`);
+  for (const w of driftWarnings(result)) core.warning(w);
   for (const w of result.warnings) core.warning(w);
   await core.summary.addRaw(renderSummary(result)).write();
 

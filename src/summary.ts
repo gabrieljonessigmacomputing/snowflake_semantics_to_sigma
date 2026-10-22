@@ -45,8 +45,8 @@ export function renderSummary(r: RunResult): string {
 
   const drifted = r.outcomes.filter(o => o.drift);
   if (drifted.length > 0) {
-    out.push('', '### Drift', '', 'These data models were edited in Sigma since the last sync and have been overwritten from git. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).', '');
-    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId})`);
+    out.push('', '### Drift', '', 'These data models were edited in Sigma since the last sync. The previous spec is in the `sigma-semantic-sync-state` artifact (`pre-update/`).', '');
+    for (const o of drifted) out.push(`- ${o.key} (${o.dataModelId}): ${o.status === 'updated' || o.status === 'adopted' ? 'overwritten from git' : 'not changed by this run'}`);
   }
 
   if (r.orphans.length > 0) {
@@ -75,4 +75,16 @@ export function renderSummary(r: RunResult): string {
 
   if (r.skipped.length > 0) out.push('', `<details><summary>${r.skipped.length} file(s) skipped (not semantic views)</summary>`, '', ...r.skipped.map(s => `- ${s}`), '', '</details>');
   return out.join('\n') + '\n';
+}
+
+/** One warning per drifted model, saying whether this run overwrote it. */
+export function driftWarnings(r: RunResult): string[] {
+  return r.outcomes
+    .filter(o => o.drift)
+    .map(o =>
+      `${o.key}: data model ${o.dataModelId} was edited in Sigma since the last sync; ` +
+      (o.status === 'updated' || o.status === 'adopted'
+        ? 'overwritten from git (previous spec saved in the run artifact)'
+        : 'it was not changed by this run (previous spec saved in the run artifact)'),
+    );
 }

@@ -11,7 +11,7 @@ import { stringify as toYaml } from 'yaml';
 import type { ViewSource } from './discover.js';
 import type { ViewOutcome } from './execute.js';
 import { keyFileName } from './identity.js';
-import { canonicalSha256, readLock, writeLock, type Lock } from './lock.js';
+import { canonicalSha256, readLock, SPEC_HASH_VERSION, writeLock, type Lock } from './lock.js';
 
 export const COMMIT_MESSAGE = 'chore(sigma): sync semantic views [skip ci]';
 export const STATE_BRANCH = 'sigma-sync/state';
@@ -61,6 +61,7 @@ export function applyOutcomes(
         optionsSha256: ctx.optionsSha256,
         engineCommit: ctx.engineCommit,
         specSha256: o.specSha256,
+        specHashVersion: SPEC_HASH_VERSION,
         lastDeployedAt: ctx.now,
         orphaned: false,
       };
