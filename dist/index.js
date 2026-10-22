@@ -25973,19 +25973,19 @@ var require_glob = __commonJS({
     exports.hashFiles = exports.create = void 0;
     var internal_globber_1 = require_internal_globber();
     var internal_hash_files_1 = require_internal_hash_files();
-    function create2(patterns, options) {
+    function create3(patterns, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         return yield internal_globber_1.DefaultGlobber.create(patterns, options);
       });
     }
-    exports.create = create2;
+    exports.create = create3;
     function hashFiles(patterns, currentWorkspace = "", options, verbose = false) {
       return __awaiter2(this, void 0, void 0, function* () {
         let followSymbolicLinks = true;
         if (options && typeof options.followSymbolicLinks === "boolean") {
           followSymbolicLinks = options.followSymbolicLinks;
         }
-        const globber = yield create2(patterns, { followSymbolicLinks });
+        const globber = yield create3(patterns, { followSymbolicLinks });
         return (0, internal_hash_files_1.hashFiles)(globber, currentWorkspace, verbose);
       });
     }
@@ -40379,11 +40379,11 @@ var require_log2 = __commonJS({
       log: () => log
     });
     module.exports = __toCommonJS2(log_exports);
-    var import_node_os2 = __require("node:os");
+    var import_node_os3 = __require("node:os");
     var import_node_util = __toESM2(__require("node:util"));
     var import_node_process = __toESM2(__require("node:process"));
     function log(message3, ...args) {
-      import_node_process.default.stderr.write(`${import_node_util.default.format(message3, ...args)}${import_node_os2.EOL}`);
+      import_node_process.default.stderr.write(`${import_node_util.default.format(message3, ...args)}${import_node_os3.EOL}`);
     }
   }
 });
@@ -42105,14 +42105,14 @@ var require_userAgentPlatform = __commonJS({
       setPlatformSpecificData: () => setPlatformSpecificData2
     });
     module.exports = __toCommonJS2(userAgentPlatform_exports);
-    var import_node_os2 = __toESM2(__require("node:os"));
+    var import_node_os3 = __toESM2(__require("node:os"));
     var import_node_process = __toESM2(__require("node:process"));
     function getHeaderName() {
       return "User-Agent";
     }
     async function setPlatformSpecificData2(map2) {
       if (import_node_process.default && import_node_process.default.versions) {
-        const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
+        const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
         if (import_node_process.default.versions.bun) {
           map2.set("Bun", `${import_node_process.default.versions.bun} (${osInfo})`);
         } else if (import_node_process.default.versions.deno) {
@@ -46608,14 +46608,14 @@ var require_userAgentPlatform2 = __commonJS({
       setPlatformSpecificData: () => setPlatformSpecificData2
     });
     module.exports = __toCommonJS2(userAgentPlatform_exports);
-    var import_node_os2 = __toESM2(__require("node:os"));
+    var import_node_os3 = __toESM2(__require("node:os"));
     var import_node_process = __toESM2(__require("node:process"));
     function getHeaderName() {
       return "User-Agent";
     }
     async function setPlatformSpecificData2(map2) {
       if (import_node_process.default && import_node_process.default.versions) {
-        const osInfo = `${import_node_os2.default.type()} ${import_node_os2.default.release()}; ${import_node_os2.default.arch()}`;
+        const osInfo = `${import_node_os3.default.type()} ${import_node_os3.default.release()}; ${import_node_os3.default.arch()}`;
         if (import_node_process.default.versions.bun) {
           map2.set("Bun", `${import_node_process.default.versions.bun} (${osInfo})`);
         } else if (import_node_process.default.versions.deno) {
@@ -97388,7 +97388,7 @@ var require_BlobStartCopyFromUrlPoller = __commonJS({
       state.isCancelled = true;
       return makeBlobBeginCopyFromURLPollOperation(state);
     };
-    var update = async function update2(options = {}) {
+    var update2 = async function update22(options = {}) {
       const state = this.state;
       const { blobClient, copySource, startCopyFromURLOptions } = state;
       if (!state.isStarted) {
@@ -97438,7 +97438,7 @@ var require_BlobStartCopyFromUrlPoller = __commonJS({
         state: { ...state },
         cancel,
         toString,
-        update
+        update: update2
       };
     }
   }
@@ -146642,8 +146642,8 @@ function optionsSha256(cfg, columnTypes) {
 }
 
 // src/run.ts
-import { copyFileSync, cpSync, existsSync as existsSync2, mkdirSync as mkdirSync4, mkdtempSync, readdirSync, readFileSync as readFileSync2 } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, cpSync, existsSync as existsSync3, mkdirSync as mkdirSync4, mkdtempSync as mkdtempSync2, readdirSync, readFileSync as readFileSync2 } from "node:fs";
+import { tmpdir as tmpdir2 } from "node:os";
 import { basename, join as join3 } from "node:path";
 
 // vendor/semantic-tools/semantic-tools-embed.mjs
@@ -158205,7 +158205,7 @@ function applyCrossTableReferences(specText, viewName) {
     used.add(id);
     const anyFormula = [...set2].map((o) => refsOf(o.formula)[0]?.[1]).find(Boolean);
     const tableName = anyFormula ?? (e.columns ?? []).map((c) => PASSTHROUGH.exec(c.formula ?? "")?.[1]).find(Boolean);
-    const rewrite = (formula) => formula.replace(REF3, (all, a, b, c) => {
+    const rewrite2 = (formula) => formula.replace(REF3, (all, a, b, c) => {
       const m = [all, a, b, c];
       if (!(e.relationships ?? []).some((r2) => r2.id === b)) return all;
       const r = resolveRef(e, m, /* @__PURE__ */ new Map());
@@ -158214,7 +158214,7 @@ function applyCrossTableReferences(specText, viewName) {
     const dCols = [];
     for (const c of e.columns ?? []) {
       if (set2.has(c)) {
-        dCols.push({ ...c, formula: rewrite(c.formula) });
+        dCols.push({ ...c, formula: rewrite2(c.formula) });
         continue;
       }
       const display = displayOf(c);
@@ -160078,16 +160078,16 @@ function parseDdlViewNames(sql) {
   }
   return names;
 }
-function parseYamlViewName(yaml) {
+function semanticViewYamlName(yaml) {
   try {
     const doc = (0, import_yaml.parse)(normalizeSource(yaml));
-    if (doc && typeof doc === "object" && !Array.isArray(doc)) {
-      const name = doc.name;
-      if (typeof name === "string" && name.trim() !== "") return name.trim();
-    }
+    if (!doc || typeof doc !== "object" || Array.isArray(doc)) return void 0;
+    const d = doc;
+    if (!Array.isArray(d.tables)) return void 0;
+    return typeof d.name === "string" && d.name.trim() !== "" ? d.name.trim() : void 0;
   } catch {
+    return void 0;
   }
-  return void 0;
 }
 function viewKey(q) {
   return PARTS.filter((p) => q[p] !== void 0 && q[p] !== "").map((p) => q.quoted?.[p] ? q[p] : q[p].toUpperCase()).join(".");
@@ -160122,31 +160122,26 @@ function discoverViews(files, defaults) {
   const errors = [];
   for (const file of files) {
     const text = normalizeSource(file.content);
-    const format = detectFormat(text);
-    if (format === void 0) {
-      skipped.push(file.path);
-      continue;
-    }
     const fileSha256 = sha256(file.content);
-    if (format === "snowflake-semantic-view") {
-      const names = parseDdlViewNames(text);
-      if (names.length === 0) {
-        errors.push({ path: file.path, message: "looks like semantic view DDL but no CREATE SEMANTIC VIEW name could be read" });
-        continue;
-      }
+    const names = parseDdlViewNames(text);
+    if (names.length > 0) {
       names.forEach((n, index) => {
         const name = withDefaults(n, defaults);
         found.push({ key: viewKey(name), name, path: file.path, format: "ddl", index, fileSha256 });
       });
-    } else {
-      const view = parseYamlViewName(text);
-      if (view === void 0) {
-        errors.push({ path: file.path, message: "semantic view YAML has no top-level name" });
-        continue;
-      }
-      const name = withDefaults({ view }, defaults);
-      found.push({ key: viewKey(name), name, path: file.path, format: "yaml", index: 0, fileSha256 });
+      continue;
     }
+    const yamlName = /\.ya?ml$/i.test(file.path) || detectFormat(text) === "snowflake-semantic-view-yaml" ? semanticViewYamlName(text) : void 0;
+    if (yamlName !== void 0) {
+      const name = withDefaults({ view: yamlName }, defaults);
+      found.push({ key: viewKey(name), name, path: file.path, format: "yaml", index: 0, fileSha256 });
+      continue;
+    }
+    if (detectFormat(text) === "snowflake-semantic-view") {
+      errors.push({ path: file.path, message: "looks like semantic view DDL but no CREATE SEMANTIC VIEW name could be read" });
+      continue;
+    }
+    skipped.push(file.path);
   }
   const byKey = /* @__PURE__ */ new Map();
   for (const v of found) byKey.set(v.key, [...byKey.get(v.key) ?? [], v]);
@@ -160165,7 +160160,7 @@ function discoverViews(files, defaults) {
 }
 async function listCandidateFiles(patterns, root, exclude) {
   const lines = patterns.split("\n").map((l) => l.trim()).filter(Boolean).flatMap(expandBraces).map((l) => l.startsWith("!") ? `!${root}/${l.slice(1)}` : `${root}/${l}`);
-  const excludes = [".git", "node_modules", ...exclude].flatMap((e) => [`!${root}/${e}`, `!${root}/${e}/**`, `!${root}/**/${e}/**`]);
+  const excludes = [".git", ".github", "node_modules", ...exclude].flatMap((e) => [`!${root}/${e}`, `!${root}/${e}/**`, `!${root}/**/${e}/**`]);
   const globber = await glob.create([...lines, ...excludes].join("\n"), { followSymbolicLinks: false, matchDirectories: false });
   const files = await globber.glob();
   return [...new Set(files.map((f) => relative(root, f).split(sep).join("/")))].sort();
@@ -160179,6 +160174,295 @@ function expandBraces(pattern) {
 // src/execute.ts
 import { mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
 import { join } from "node:path";
+
+// src/preserve-ids.ts
+var ID_KEY = /^(id|.*Id|.*Ids|order|uniqueKeys)$/;
+var norm = (s) => typeof s === "string" && s.trim() !== "" ? s.replace(/\s+/g, " ").trim() : void 0;
+function pairBy(a, b, keys) {
+  const pairs2 = [];
+  const usedA = /* @__PURE__ */ new Set();
+  const usedB = /* @__PURE__ */ new Set();
+  for (const key of keys) {
+    const pool = /* @__PURE__ */ new Map();
+    b.forEach((x, i) => {
+      if (usedB.has(i)) return;
+      const k = key(x, i);
+      if (k !== void 0) pool.set(k, [...pool.get(k) ?? [], i]);
+    });
+    a.forEach((x, i) => {
+      if (usedA.has(i)) return;
+      const k = key(x, i);
+      const j = k === void 0 ? void 0 : pool.get(k)?.shift();
+      if (j === void 0) return;
+      usedA.add(i);
+      usedB.add(j);
+      pairs2.push([x, b[j]]);
+    });
+  }
+  return pairs2;
+}
+var elementsOf = (spec) => (spec.pages ?? []).flatMap((p) => p.elements ?? []);
+function signatures(spec) {
+  const els = elementsOf(spec);
+  const byId = new Map(els.filter((e) => typeof e.id === "string").map((e) => [e.id, e]));
+  const memo = /* @__PURE__ */ new Map();
+  const sig = (e, seen) => {
+    if (!e) return "?";
+    if (memo.has(e)) return memo.get(e);
+    if (seen.has(e)) return "cycle";
+    seen.add(e);
+    const s = e.source ?? {};
+    const ref = (id) => `el(${sig(typeof id === "string" ? byId.get(id) : void 0, seen)})`;
+    let out;
+    if (Array.isArray(s.path)) out = `path:${s.path.map((p) => String(p).toUpperCase()).join(".")}`;
+    else if (typeof s.statement === "string") out = `sql:${norm(s.statement)}`;
+    else if (typeof s.elementId === "string") out = ref(s.elementId);
+    else if (Array.isArray(s.sources)) out = `union(${s.sources.map((x) => typeof x?.elementId === "string" ? ref(x.elementId) : JSON.stringify(x)).join(",")})`;
+    else {
+      const { connectionId: _c2, ...rest } = s;
+      out = JSON.stringify(rest);
+    }
+    out = `${e.kind ?? ""}|${s.kind ?? ""}|${out}`;
+    memo.set(e, out);
+    return out;
+  };
+  for (const e of els) sig(e, /* @__PURE__ */ new Set());
+  return memo;
+}
+function childKeys(field, targetSig) {
+  const name = (x) => norm(x.name);
+  const formula = (x) => norm(x.formula);
+  if (field === "columns") return [formula, name];
+  if (field === "metrics") return [name, formula];
+  if (field === "relationships") return [name, (x) => targetSig(x)];
+  return [name, formula, (x) => norm(x.label)];
+}
+function rewrite(value, key, map2) {
+  if (typeof value === "string") return ID_KEY.test(key) && map2.has(value) ? map2.get(value) : value;
+  if (Array.isArray(value)) return value.map((v) => rewrite(v, key, map2));
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, rewrite(v, k, map2)]));
+  return value;
+}
+function allIds(value, out = []) {
+  if (Array.isArray(value)) value.forEach((v) => allIds(v, out));
+  else if (value && typeof value === "object") {
+    for (const [k, v] of Object.entries(value)) {
+      if (k === "id" && typeof v === "string") out.push(v);
+      allIds(v, out);
+    }
+  }
+  return out;
+}
+function preserveIds(next, live) {
+  const map2 = /* @__PURE__ */ new Map();
+  const link = (a, b) => {
+    if (typeof a.id === "string" && typeof b.id === "string") map2.set(a.id, b.id);
+  };
+  for (const [a, b] of pairBy(next.pages ?? [], live.pages ?? [], [(x) => norm(x.name), (_x2, i) => String(i)])) link(a, b);
+  const nextSig = signatures(next);
+  const liveSig = signatures(live);
+  const nextById = new Map(elementsOf(next).map((e) => [e.id, e]));
+  const liveById = new Map(elementsOf(live).map((e) => [e.id, e]));
+  const elementPairs = pairBy(elementsOf(next), elementsOf(live), [
+    (x) => norm(x.name) ? `${nextSig.get(x) ?? liveSig.get(x)}|${norm(x.name)}` : void 0,
+    (x) => nextSig.get(x) ?? liveSig.get(x)
+  ]);
+  for (const [a, b] of elementPairs) {
+    link(a, b);
+    for (const [field, items] of Object.entries(a)) {
+      if (!Array.isArray(items) || !items.every((i) => i && typeof i === "object" && typeof i.id === "string")) continue;
+      const liveItems = Array.isArray(b[field]) ? b[field] : [];
+      const targetSig = (r) => {
+        const t = nextById.get(r.targetElementId) ?? liveById.get(r.targetElementId);
+        return t ? nextSig.get(t) ?? liveSig.get(t) : void 0;
+      };
+      for (const [x, y] of pairBy(items, liveItems, childKeys(field, targetSig))) link(x, y);
+    }
+  }
+  const liveIds = new Set(allIds(live));
+  for (const id of allIds(next)) {
+    if (!map2.has(id) && liveIds.has(id)) map2.set(id, `${id}__new`);
+  }
+  const spec = rewrite(structuredClone(next), "", map2);
+  const mapped = [...map2.values()].filter((v) => liveIds.has(v)).length;
+  const fresh = allIds(spec).filter((id) => !liveIds.has(id)).length;
+  return { spec, mapped, fresh };
+}
+
+// src/sigma/client.ts
+var SigmaApiError = class extends Error {
+  status;
+  operation;
+  /** Raw response body (secrets redacted). */
+  body;
+  constructor(operation, status, body, detail) {
+    super(`${operation} failed with status ${status}${detail ? `: ${detail}` : ""}`);
+    this.name = "SigmaApiError";
+    this.operation = operation;
+    this.status = status;
+    this.body = body;
+  }
+};
+var TOKEN_TTL_MS = 50 * 60 * 1e3;
+var MAX_ATTEMPTS = 3;
+var NOT_SENT = /* @__PURE__ */ new Set(["ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN"]);
+function detailOf(body) {
+  if (body && typeof body === "object") {
+    const r = body;
+    for (const k of ["message", "error_description", "error", "detail"]) if (typeof r[k] === "string") return r[k];
+  }
+  return void 0;
+}
+var SigmaClient = class {
+  constructor(creds, deps = {}) {
+    this.creds = creds;
+    this.base = creds.baseUrl.replace(/\/+$/, "");
+    this.doFetch = deps.fetch ?? fetch;
+    this.now = deps.now ?? Date.now;
+    this.sleep = deps.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  }
+  creds;
+  base;
+  doFetch;
+  now;
+  sleep;
+  token;
+  redact(text) {
+    const secret = this.creds.clientSecret;
+    if (!secret) return text;
+    return text.split(secret).join("***").split(encodeURIComponent(secret)).join("***");
+  }
+  /**
+   * fetch with retry (1s, 2s, … or Retry-After). 429 and connection-refused
+   * failures are always retried (the request was not processed / never sent);
+   * 5xx and other network errors only when `idempotent`, because a POST that
+   * timed out may already have created its model.
+   */
+  async send(url, init, idempotent = true) {
+    for (let attempt = 1; ; attempt++) {
+      let res;
+      let netErr;
+      try {
+        res = await this.doFetch(url, init);
+      } catch (e) {
+        netErr = e;
+      }
+      const neverSent = res === void 0 && NOT_SENT.has(String(netErr?.cause?.code));
+      const retryable = res === void 0 ? idempotent || neverSent : res.status === 429 || idempotent && res.status >= 500;
+      if (!retryable || attempt >= MAX_ATTEMPTS) {
+        if (res === void 0) throw netErr;
+        return res;
+      }
+      const retryAfter = Number(res?.headers.get("retry-after"));
+      await this.sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1e3 : 1e3 * 2 ** (attempt - 1));
+    }
+  }
+  async fail(operation, res) {
+    const raw = this.redact(await res.text().catch(() => ""));
+    let detail;
+    try {
+      detail = detailOf(JSON.parse(raw));
+    } catch {
+      detail = raw || void 0;
+    }
+    throw new SigmaApiError(operation, res.status, raw, detail && this.redact(detail));
+  }
+  async accessToken(force = false) {
+    if (!force && this.token && this.now() - this.token.mintedAt < TOKEN_TTL_MS) return this.token.value;
+    const body = new URLSearchParams({ grant_type: "client_credentials", client_id: this.creds.clientId, client_secret: this.creds.clientSecret });
+    const res = await this.send(`${this.base}/v2/auth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    });
+    if (!res.ok) await this.fail("Sigma token exchange", res);
+    const parsed = await res.json();
+    if (typeof parsed.access_token !== "string") throw new Error("Sigma token exchange returned no access_token");
+    this.token = { value: parsed.access_token, mintedAt: this.now() };
+    return this.token.value;
+  }
+  /** Authenticated request; refreshes the token once on a 401. Returns the response (any status). */
+  async request(method, path, body) {
+    const go = async (token) => this.send(`${this.base}${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        ...body !== void 0 && { "Content-Type": "application/json" }
+      },
+      ...body !== void 0 && { body: JSON.stringify(body) }
+    }, method !== "POST");
+    let res = await go(await this.accessToken());
+    if (res.status === 401) res = await go(await this.accessToken(true));
+    return res;
+  }
+  async json(operation, method, path, body) {
+    const res = await this.request(method, path, body);
+    if (!res.ok) await this.fail(operation, res);
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
+  }
+  /** Every entry of a paginated listing (follows `nextPage` until absent or `hasMore: false`). */
+  async listAll(operation, path, params = {}) {
+    const out = [];
+    let page;
+    for (; ; ) {
+      const q = new URLSearchParams({ ...params, ...page !== void 0 && { page } });
+      const qs = q.toString();
+      const body = await this.json(operation, "GET", `${path}${qs ? `?${qs}` : ""}`);
+      if (Array.isArray(body.entries)) out.push(...body.entries);
+      if (body.hasMore === false || typeof body.nextPage !== "string" || body.nextPage === "") return out;
+      page = body.nextPage;
+    }
+  }
+  async resolveConnectionId(name) {
+    const all = await this.listAll("Sigma connection lookup", "/v2/connections");
+    const hit = all.find((c) => c.name === name && typeof c.connectionId === "string");
+    if (!hit) throw new Error(`no Sigma connection named "${name}"`);
+    return hit.connectionId;
+  }
+  async resolveFolderId(name) {
+    const all = await this.listAll("Sigma folder lookup", "/v2/files", { typeFilters: "folder", limit: "200" });
+    const hits = all.filter((f) => f.name === name && typeof f.id === "string");
+    if (hits.length === 0) throw new Error(`no Sigma folder named "${name}"`);
+    if (hits.length > 1) throw new Error(`${hits.length} Sigma folders named "${name}"; use folder_id instead`);
+    return hits[0].id;
+  }
+  async listDataModelsInFolder(folderId) {
+    const all = await this.listAll("Sigma folder listing", "/v2/files", { parentId: folderId, limit: "200" });
+    return all.filter((f) => f.type === "data-model" && typeof f.id === "string" && typeof f.name === "string").map((f) => ({ id: f.id, name: f.name }));
+  }
+  async getDataModelSpec(id) {
+    const res = await this.request("GET", `/v2/dataModels/${encodeURIComponent(id)}/spec`);
+    if (res.status === 404) return null;
+    if (!res.ok) await this.fail("Sigma data model read", res);
+    return await res.json();
+  }
+  async createDataModel(spec, name, folderId) {
+    const r = await this.json("Sigma data model creation", "POST", "/v2/dataModels/spec", { ...spec, name, folderId });
+    if (typeof r.dataModelId !== "string") throw new Error("Sigma data model creation returned no dataModelId");
+    return r.dataModelId;
+  }
+  async updateDataModel(id, spec) {
+    await this.json("Sigma data model update", "PUT", `/v2/dataModels/${encodeURIComponent(id)}/spec`, spec);
+  }
+  async deleteFile(id) {
+    const res = await this.request("DELETE", `/v2/files/${encodeURIComponent(id)}`);
+    if (!res.ok) await this.fail("Sigma file deletion", res);
+  }
+  async listDataModelColumns(id) {
+    const all = await this.listAll("Sigma data model columns", `/v2/dataModels/${encodeURIComponent(id)}/columns`);
+    return all.map((c) => ({
+      elementId: String(c.elementId ?? ""),
+      columnId: String(c.columnId ?? ""),
+      label: String(c.label ?? c.name ?? ""),
+      formula: String(c.formula ?? ""),
+      type: String(c.type?.type ?? c.type ?? "")
+    }));
+  }
+};
+
+// src/execute.ts
 var message = (e) => e instanceof Error ? e.message : String(e);
 async function errorColumns(client, id) {
   const cols = await client.listDataModelColumns(id);
@@ -160201,57 +160485,105 @@ async function executeView(client, args) {
     return { ...out, status: would[decision.kind], ...decision.kind !== "create" && { dataModelId: decision.dataModelId } };
   }
   if (!client || !args.spec) return { ...out, error: "internal: no Sigma client or spec for a write" };
-  if (decision.kind === "create") {
-    if (!args.folderId) return { ...out, error: "internal: no folder id for create" };
-    let id2;
+  if (decision.kind === "create") return create2(client, args, out);
+  return update(client, args, { ...out, dataModelId: decision.dataModelId }, decision.kind);
+}
+var ambiguous = (e) => !(e instanceof SigmaApiError) || e.status >= 500;
+async function create2(client, args, out) {
+  const { modelName, folderId, spec } = args;
+  if (!folderId || !spec) return { ...out, error: "internal: no folder id or spec for create" };
+  const warnings = [];
+  let id;
+  try {
+    id = await client.createDataModel(spec, modelName, folderId);
+  } catch (e) {
+    if (!ambiguous(e)) return { ...out, error: message(e) };
+    let mine;
     try {
-      id2 = await client.createDataModel(args.spec, modelName, args.folderId);
-      const bad2 = await errorColumns(client, id2);
-      if (bad2.length > 0) {
-        try {
-          await client.deleteFile(id2);
-        } catch (e) {
-          return { ...out, dataModelId: id2, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve, and deleting the new model failed: ${message(e)}` };
-        }
-        return { ...out, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve; the new data model was deleted` };
-      }
-      const getBack = await client.getDataModelSpec(id2);
-      if (!getBack) return { ...out, dataModelId: id2, error: `data model ${id2} was created but could not be read back` };
-      return { ...out, status: "created", dataModelId: id2, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
-    } catch (e) {
-      return { ...out, ...id2 && { dataModelId: id2 }, error: message(e) };
+      mine = (await client.listDataModelsInFolder(folderId)).filter((m) => m.name === modelName);
+    } catch {
+      return { ...out, error: `${message(e)}; could not check whether Sigma created "${modelName}" anyway \u2014 look in the target folder before the next run` };
+    }
+    if (mine.length !== 1) return { ...out, error: mine.length === 0 ? message(e) : `${message(e)}; ${mine.length} data models named "${modelName}" now exist (${mine.map((m) => m.id).join(", ")})` };
+    id = mine[0].id;
+    warnings.push(`${args.view.key}: creating "${modelName}" returned an error (${message(e)}) but Sigma had created it; recovered data model ${id}`);
+  }
+  let bad2;
+  try {
+    bad2 = await errorColumns(client, id);
+  } catch (e) {
+    try {
+      await client.deleteFile(id);
+      return { ...out, warnings, error: `the column check could not run (${message(e)}); the new data model was deleted` };
+    } catch (d) {
+      return { ...out, warnings, dataModelId: id, keepInLock: true, error: `the column check could not run (${message(e)}) and deleting the new data model failed (${message(d)}); it will be re-checked next run` };
     }
   }
-  const id = decision.dataModelId;
-  out.dataModelId = id;
-  try {
-    const pre = await client.getDataModelSpec(id);
-    if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
-    const drift = decision.kind === "update" && args.lockEntry !== void 0 && canonicalSha256(pre) !== args.lockEntry.specSha256;
-    out.drift = drift;
-    if (drift || decision.kind === "adopt") savePre(args.preUpdateDir, view.key, pre);
-    await client.updateDataModel(id, args.spec);
-    const bad2 = await errorColumns(client, id);
-    if (bad2.length > 0) {
-      try {
-        await client.updateDataModel(id, pre);
-      } catch (e) {
-        return { ...out, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve, and rolling back failed: ${message(e)}` };
-      }
-      return { ...out, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve; the previous spec was restored` };
+  if (bad2.length > 0) {
+    try {
+      await client.deleteFile(id);
+    } catch (e) {
+      return { ...out, warnings, dataModelId: id, keepInLock: true, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve, and deleting the new model failed: ${message(e)}` };
     }
+    return { ...out, warnings, errorColumns: bad2, error: `${bad2.length} column(s) did not resolve; the new data model was deleted` };
+  }
+  try {
     const getBack = await client.getDataModelSpec(id);
-    if (!getBack) return { ...out, error: `data model ${id} was updated but could not be read back` };
-    return { ...out, status: decision.kind === "adopt" ? "adopted" : "updated", getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+    if (getBack) return { ...out, warnings, status: "created", dataModelId: id, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+  } catch {
+  }
+  warnings.push(`${args.view.key}: data model ${id} was created and verified but could not be read back; drift will not be checked on its next update`);
+  return { ...out, warnings, status: "created", dataModelId: id, specSha256: "" };
+}
+async function update(client, args, out, kind) {
+  const id = out.dataModelId;
+  const spec = args.spec;
+  let pre;
+  try {
+    pre = await client.getDataModelSpec(id);
   } catch (e) {
     return { ...out, error: message(e) };
   }
+  if (!pre) return { ...out, error: `data model ${id} no longer exists in Sigma` };
+  const known = args.lockEntry?.specSha256;
+  const drift = kind === "update" && !!known && canonicalSha256(pre) !== known;
+  out.drift = drift;
+  if (drift || kind === "adopt") savePre(args.preUpdateDir, args.view.key, pre);
+  const body = {
+    ...preserveIds(spec, pre).spec,
+    ...pre.name !== void 0 && { name: pre.name },
+    ...pre.folderId !== void 0 && { folderId: pre.folderId }
+  };
+  let failure;
+  try {
+    await client.updateDataModel(id, body);
+    const bad2 = await errorColumns(client, id);
+    if (bad2.length > 0) failure = { error: `${bad2.length} column(s) did not resolve`, errorColumns: bad2 };
+  } catch (e) {
+    failure = { error: `the update or its column check failed (${message(e)})` };
+  }
+  if (failure) {
+    try {
+      await client.updateDataModel(id, pre);
+    } catch (e) {
+      return { ...out, ...failure, keepInLock: true, error: `${failure.error}, and rolling back failed: ${message(e)}; the live spec is unverified and will be redeployed next run` };
+    }
+    return { ...out, ...failure, error: `${failure.error}; the previous spec was restored` };
+  }
+  const status = kind === "adopt" ? "adopted" : "updated";
+  try {
+    const getBack = await client.getDataModelSpec(id);
+    if (getBack) return { ...out, status, getBackSpec: getBack, specSha256: canonicalSha256(getBack) };
+  } catch {
+  }
+  return { ...out, status, specSha256: "", warnings: [`${args.view.key}: data model ${id} was updated and verified but could not be read back; drift will not be checked on its next update`] };
 }
 
 // src/writeback.ts
 var import_exec = __toESM(require_exec(), 1);
 var import_yaml2 = __toESM(require_dist(), 1);
-import { mkdirSync as mkdirSync3, writeFileSync as writeFileSync3 } from "node:fs";
+import { existsSync as existsSync2, mkdirSync as mkdirSync3, mkdtempSync, writeFileSync as writeFileSync3 } from "node:fs";
+import { tmpdir } from "node:os";
 import { join as join2 } from "node:path";
 var COMMIT_MESSAGE = "chore(sigma): sync semantic views [skip ci]";
 var STATE_BRANCH = "sigma-sync/state";
@@ -160263,7 +160595,7 @@ function applyOutcomes(lock, outcomes, views, ctx, orphans) {
   for (const o of outcomes) {
     const v = byKey.get(o.key);
     if (!v) continue;
-    if ((o.status === "created" || o.status === "updated" || o.status === "adopted") && o.dataModelId && o.specSha256) {
+    if ((o.status === "created" || o.status === "updated" || o.status === "adopted") && o.dataModelId && o.specSha256 !== void 0) {
       next.views[o.key] = {
         dataModelId: o.dataModelId,
         modelName: o.modelName,
@@ -160272,6 +160604,19 @@ function applyOutcomes(lock, outcomes, views, ctx, orphans) {
         optionsSha256: ctx.optionsSha256,
         engineCommit: ctx.engineCommit,
         specSha256: o.specSha256,
+        lastDeployedAt: ctx.now,
+        orphaned: false
+      };
+    } else if (o.status === "failed" && o.keepInLock && o.dataModelId) {
+      const prev = next.views[o.key];
+      next.views[o.key] = {
+        dataModelId: o.dataModelId,
+        modelName: prev?.modelName ?? o.modelName,
+        sourcePath: v.path,
+        sourceSha256: "",
+        optionsSha256: prev?.optionsSha256 ?? ctx.optionsSha256,
+        engineCommit: prev?.engineCommit ?? ctx.engineCommit,
+        specSha256: "",
         lastDeployedAt: ctx.now,
         orphaned: false
       };
@@ -160359,11 +160704,56 @@ async function uploadStateArtifact(files, rootDir, upload) {
   const client = upload ?? new (await Promise.resolve().then(() => __toESM(require_artifact2(), 1))).DefaultArtifactClient();
   await client.uploadArtifact(ARTIFACT_NAME, files, rootDir, { retentionDays: 30 });
 }
+function mergeLocks(base, overlay) {
+  const views = { ...base.views };
+  const won = [];
+  for (const [key, e] of Object.entries(overlay.views)) {
+    const mine = views[key];
+    if (!mine || e.lastDeployedAt > mine.lastDeployedAt) {
+      views[key] = e;
+      won.push(key);
+    }
+  }
+  return { lock: { version: 1, views }, won };
+}
+async function refreshState(mode, ctx, lockFile, specsDir) {
+  const warnings = [];
+  if (mode === "none") return { warnings };
+  const shallow = (await gitRun(ctx, "rev-parse", "--is-shallow-repository")).stdout.trim() === "true";
+  if (mode === "push") {
+    const fetch3 = await gitRun(ctx, "fetch", "-q", "--no-tags", ...shallow ? ["--unshallow"] : [], "origin", ctx.ref);
+    if (fetch3.exitCode !== 0) return { warnings: [`could not fetch ${ctx.ref} to refresh state: ${fetch3.stderr.trim()}`] };
+    if ((await gitRun(ctx, "merge-base", "--is-ancestor", "HEAD", "FETCH_HEAD")).exitCode !== 0) {
+      return { warnings: [`${ctx.ref} has diverged from this checkout; using the checked-out lockfile`] };
+    }
+    const ff = await gitRun(ctx, "merge", "-q", "--ff-only", "FETCH_HEAD");
+    if (ff.exitCode !== 0) warnings.push(`could not fast-forward to the tip of ${ctx.ref}: ${ff.stderr.trim()}`);
+    return { warnings };
+  }
+  const fetch2 = await gitRun(ctx, "fetch", "-q", "--no-tags", "--depth=1", "origin", STATE_BRANCH);
+  if (fetch2.exitCode !== 0) return { warnings };
+  const shown = await gitRun(ctx, "show", `FETCH_HEAD:${lockFile}`);
+  if (shown.exitCode !== 0) return { warnings };
+  const tmp2 = join2(mkdtempSync(join2(tmpdir(), "sigma-state-")), "lock.json");
+  writeFileSync3(tmp2, shown.stdout);
+  let stateLock;
+  try {
+    stateLock = readLock(tmp2);
+  } catch (e) {
+    return { warnings: [`ignoring the lockfile on ${STATE_BRANCH}: ${e instanceof Error ? e.message : String(e)}`] };
+  }
+  const lockPath = join2(ctx.cwd, lockFile);
+  const current = readLock(lockPath);
+  const { lock, won } = mergeLocks(current, stateLock);
+  if (canonicalSha256(lock) !== canonicalSha256(current) || !existsSync2(lockPath)) writeLock(lockPath, lock);
+  for (const key of won) await gitRun(ctx, "checkout", "FETCH_HEAD", "--", `${specsDir}/${keyFileName(key)}.yml`);
+  return { warnings };
+}
 
 // src/run.ts
 var message2 = (e) => e instanceof Error ? e.message : String(e);
 function listFilesDeep(dir) {
-  if (!existsSync2(dir)) return [];
+  if (!existsSync3(dir)) return [];
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? listFilesDeep(join3(dir, e.name)) : [join3(dir, e.name)]);
 }
 async function run(cfg, deps) {
@@ -160375,6 +160765,7 @@ async function run(cfg, deps) {
     const refused = cfg.failOnRefused && result.outcomes.some((o) => o.status === "refused");
     return { ...result, exitCode: failed || refused ? 1 : 0 };
   };
+  if (!cfg.dryRun && deps.refreshState) result.warnings.push(...(await deps.refreshState()).warnings);
   const lockPath = join3(cwd, cfg.lockFile);
   let lock;
   try {
@@ -160391,6 +160782,13 @@ async function run(cfg, deps) {
   );
   result.skipped = discovery.skipped;
   result.errors.push(...discovery.errors);
+  const skipped = new Set(discovery.skipped);
+  for (const [key, e] of Object.entries(lock.views)) {
+    if (!e.orphaned && skipped.has(e.sourcePath)) {
+      result.errors.push({ path: e.sourcePath, message: `defined semantic view ${key} (Sigma data model ${e.dataModelId}) but is no longer recognized as a semantic view; fix the file or delete it` });
+    }
+  }
+  const unseenPaths = new Set(result.errors.map((e) => e.path));
   const colliding = new Set(findNameCollisions(discovery.views, cfg.modelNameTemplate).flat());
   for (const v of discovery.views.filter((v2) => colliding.has(v2.key))) {
     const modelName = renderModelName(cfg.modelNameTemplate, v.name);
@@ -160433,7 +160831,7 @@ async function run(cfg, deps) {
     });
     for (const v of selected.filter((s) => s.path === path)) {
       const r = conv.results[v.index];
-      if (r && r.viewName.toUpperCase() === v.name.view.toUpperCase()) conversions.set(v.key, r);
+      if (r && (r.viewName.toUpperCase() === v.name.view.toUpperCase() || !r.ok)) conversions.set(v.key, r);
     }
   }
   let folderModels;
@@ -160450,7 +160848,7 @@ async function run(cfg, deps) {
       return finish();
     }
   }
-  const tempDir = deps.tempDir ?? mkdtempSync(join3(tmpdir(), "sigma-sync-"));
+  const tempDir = deps.tempDir ?? mkdtempSync2(join3(tmpdir2(), "sigma-sync-"));
   const preUpdateDir = join3(tempDir, "state", "pre-update");
   for (const v of selected) {
     const modelName = renderModelName(cfg.modelNameTemplate, v.name);
@@ -160472,17 +160870,17 @@ async function run(cfg, deps) {
     result.warnings.push(...warnings);
     const { name: _name, ...spec } = conversion.model ?? {};
     const effectiveLock = decision.kind === "update" ? lockEntry : void 0;
-    result.outcomes.push(
-      await executeView(client, { view: v, decision, spec, modelName, folderId, lockEntry: effectiveLock, findings: conversion.findings, dryRun: cfg.dryRun, preUpdateDir })
-    );
+    const outcome = await executeView(client, { view: v, decision, spec, modelName, folderId, lockEntry: effectiveLock, findings: conversion.findings, dryRun: cfg.dryRun, preUpdateDir });
+    result.warnings.push(...outcome.warnings ?? []);
+    result.outcomes.push(outcome);
   }
-  const orphanKeys = findOrphans(discovery.views, lock);
+  const orphanKeys = findOrphans(discovery.views, lock).filter((k) => !unseenPaths.has(lock.views[k].sourcePath));
   result.orphans = orphanKeys.map((key) => ({ key, dataModelId: lock.views[key].dataModelId }));
   if (cfg.dryRun) return finish();
   const lockAfter = applyOutcomes(lock, result.outcomes, discovery.views, { engineCommit, optionsSha256: optsSha, now: deps.now() }, orphanKeys);
   result.lockAfter = lockAfter;
   const changed = [];
-  if (existsSync2(lockPath) || canonicalSha256(lockAfter) !== canonicalSha256(lock)) {
+  if (existsSync3(lockPath) || canonicalSha256(lockAfter) !== canonicalSha256(lock)) {
     writeLock(lockPath, lockAfter);
     changed.push(cfg.lockFile);
   }
@@ -160503,8 +160901,8 @@ async function run(cfg, deps) {
   if (!result.writeBack.ok || drift) {
     const stateDir = join3(tempDir, "state");
     mkdirSync4(stateDir, { recursive: true });
-    if (existsSync2(lockPath)) copyFileSync(lockPath, join3(stateDir, basename(cfg.lockFile)));
-    if (existsSync2(join3(cwd, cfg.specsDir))) cpSync(join3(cwd, cfg.specsDir), join3(stateDir, "models"), { recursive: true });
+    if (existsSync3(lockPath)) copyFileSync(lockPath, join3(stateDir, basename(cfg.lockFile)));
+    if (existsSync3(join3(cwd, cfg.specsDir))) cpSync(join3(cwd, cfg.specsDir), join3(stateDir, "models"), { recursive: true });
     try {
       await deps.upload(listFilesDeep(stateDir), stateDir);
     } catch (e) {
@@ -160513,172 +160911,6 @@ async function run(cfg, deps) {
   }
   return finish();
 }
-
-// src/sigma/client.ts
-var SigmaApiError = class extends Error {
-  status;
-  operation;
-  /** Raw response body (secrets redacted). */
-  body;
-  constructor(operation, status, body, detail) {
-    super(`${operation} failed with status ${status}${detail ? `: ${detail}` : ""}`);
-    this.name = "SigmaApiError";
-    this.operation = operation;
-    this.status = status;
-    this.body = body;
-  }
-};
-var TOKEN_TTL_MS = 50 * 60 * 1e3;
-var MAX_ATTEMPTS = 3;
-function detailOf(body) {
-  if (body && typeof body === "object") {
-    const r = body;
-    for (const k of ["message", "error_description", "error", "detail"]) if (typeof r[k] === "string") return r[k];
-  }
-  return void 0;
-}
-var SigmaClient = class {
-  constructor(creds, deps = {}) {
-    this.creds = creds;
-    this.base = creds.baseUrl.replace(/\/+$/, "");
-    this.doFetch = deps.fetch ?? fetch;
-    this.now = deps.now ?? Date.now;
-    this.sleep = deps.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
-  }
-  creds;
-  base;
-  doFetch;
-  now;
-  sleep;
-  token;
-  redact(text) {
-    const secret = this.creds.clientSecret;
-    if (!secret) return text;
-    return text.split(secret).join("***").split(encodeURIComponent(secret)).join("***");
-  }
-  /** fetch with retry on 429 / 5xx / network errors (1s, 2s, … or Retry-After). */
-  async send(url, init) {
-    for (let attempt = 1; ; attempt++) {
-      let res;
-      let netErr;
-      try {
-        res = await this.doFetch(url, init);
-      } catch (e) {
-        netErr = e;
-      }
-      const retryable = res === void 0 || res.status === 429 || res.status >= 500;
-      if (!retryable || attempt >= MAX_ATTEMPTS) {
-        if (res === void 0) throw netErr;
-        return res;
-      }
-      const retryAfter = Number(res?.headers.get("retry-after"));
-      await this.sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1e3 : 1e3 * 2 ** (attempt - 1));
-    }
-  }
-  async fail(operation, res) {
-    const raw = this.redact(await res.text().catch(() => ""));
-    let detail;
-    try {
-      detail = detailOf(JSON.parse(raw));
-    } catch {
-      detail = raw || void 0;
-    }
-    throw new SigmaApiError(operation, res.status, raw, detail && this.redact(detail));
-  }
-  async accessToken(force = false) {
-    if (!force && this.token && this.now() - this.token.mintedAt < TOKEN_TTL_MS) return this.token.value;
-    const body = new URLSearchParams({ grant_type: "client_credentials", client_id: this.creds.clientId, client_secret: this.creds.clientSecret });
-    const res = await this.send(`${this.base}/v2/auth/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString()
-    });
-    if (!res.ok) await this.fail("Sigma token exchange", res);
-    const parsed = await res.json();
-    if (typeof parsed.access_token !== "string") throw new Error("Sigma token exchange returned no access_token");
-    this.token = { value: parsed.access_token, mintedAt: this.now() };
-    return this.token.value;
-  }
-  /** Authenticated request; refreshes the token once on a 401. Returns the response (any status). */
-  async request(method, path, body) {
-    const go = async (token) => this.send(`${this.base}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        ...body !== void 0 && { "Content-Type": "application/json" }
-      },
-      ...body !== void 0 && { body: JSON.stringify(body) }
-    });
-    let res = await go(await this.accessToken());
-    if (res.status === 401) res = await go(await this.accessToken(true));
-    return res;
-  }
-  async json(operation, method, path, body) {
-    const res = await this.request(method, path, body);
-    if (!res.ok) await this.fail(operation, res);
-    const text = await res.text();
-    return text ? JSON.parse(text) : {};
-  }
-  /** Every entry of a paginated listing (follows `nextPage` until absent or `hasMore: false`). */
-  async listAll(operation, path, params = {}) {
-    const out = [];
-    let page;
-    for (; ; ) {
-      const q = new URLSearchParams({ ...params, ...page !== void 0 && { page } });
-      const qs = q.toString();
-      const body = await this.json(operation, "GET", `${path}${qs ? `?${qs}` : ""}`);
-      if (Array.isArray(body.entries)) out.push(...body.entries);
-      if (body.hasMore === false || typeof body.nextPage !== "string" || body.nextPage === "") return out;
-      page = body.nextPage;
-    }
-  }
-  async resolveConnectionId(name) {
-    const all = await this.listAll("Sigma connection lookup", "/v2/connections");
-    const hit = all.find((c) => c.name === name && typeof c.connectionId === "string");
-    if (!hit) throw new Error(`no Sigma connection named "${name}"`);
-    return hit.connectionId;
-  }
-  async resolveFolderId(name) {
-    const all = await this.listAll("Sigma folder lookup", "/v2/files", { typeFilters: "folder", limit: "200" });
-    const hits = all.filter((f) => f.name === name && typeof f.id === "string");
-    if (hits.length === 0) throw new Error(`no Sigma folder named "${name}"`);
-    if (hits.length > 1) throw new Error(`${hits.length} Sigma folders named "${name}"; use folder_id instead`);
-    return hits[0].id;
-  }
-  async listDataModelsInFolder(folderId) {
-    const all = await this.listAll("Sigma folder listing", "/v2/files", { parentId: folderId, limit: "200" });
-    return all.filter((f) => f.type === "data-model" && typeof f.id === "string" && typeof f.name === "string").map((f) => ({ id: f.id, name: f.name }));
-  }
-  async getDataModelSpec(id) {
-    const res = await this.request("GET", `/v2/dataModels/${encodeURIComponent(id)}/spec`);
-    if (res.status === 404) return null;
-    if (!res.ok) await this.fail("Sigma data model read", res);
-    return await res.json();
-  }
-  async createDataModel(spec, name, folderId) {
-    const r = await this.json("Sigma data model creation", "POST", "/v2/dataModels/spec", { ...spec, name, folderId });
-    if (typeof r.dataModelId !== "string") throw new Error("Sigma data model creation returned no dataModelId");
-    return r.dataModelId;
-  }
-  async updateDataModel(id, spec) {
-    await this.json("Sigma data model update", "PUT", `/v2/dataModels/${encodeURIComponent(id)}/spec`, spec);
-  }
-  async deleteFile(id) {
-    const res = await this.request("DELETE", `/v2/files/${encodeURIComponent(id)}`);
-    if (!res.ok) await this.fail("Sigma file deletion", res);
-  }
-  async listDataModelColumns(id) {
-    const all = await this.listAll("Sigma data model columns", `/v2/dataModels/${encodeURIComponent(id)}/columns`);
-    return all.map((c) => ({
-      elementId: String(c.elementId ?? ""),
-      columnId: String(c.columnId ?? ""),
-      label: String(c.label ?? c.name ?? ""),
-      formula: String(c.formula ?? ""),
-      type: String(c.type?.type ?? c.type ?? "")
-    }));
-  }
-};
 
 // src/summary.ts
 var cell = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
@@ -160756,13 +160988,18 @@ async function main() {
   if (cfg.sigma) core.setSecret(cfg.sigma.clientSecret);
   const client = cfg.sigma ? new SigmaClient(cfg.sigma) : void 0;
   const octokit = cfg.commitMode === "pull_request" && cfg.githubToken ? github.getOctokit(cfg.githubToken).rest : void 0;
+  const cwd = process.env.GITHUB_WORKSPACE ?? process.cwd();
+  const ref = (github.context.ref ?? "").replace(/^refs\/heads\//, "");
+  const repo = process.env.GITHUB_REPOSITORY ? github.context.repo : { owner: "", repo: "" };
+  const gitCtx = { cwd, ref, repo, token: cfg.githubToken, gitUserName: cfg.gitUserName, gitUserEmail: cfg.gitUserEmail, octokit };
   const result = await run(cfg, {
-    cwd: process.env.GITHUB_WORKSPACE ?? process.cwd(),
+    cwd,
     client,
     writeBack,
     upload: (files, root) => uploadStateArtifact(files, root),
-    ref: (github.context.ref ?? "").replace(/^refs\/heads\//, ""),
-    repo: process.env.GITHUB_REPOSITORY ? github.context.repo : { owner: "", repo: "" },
+    ref,
+    repo,
+    refreshState: () => refreshState(cfg.commitMode, gitCtx, cfg.lockFile, cfg.specsDir),
     now: () => (/* @__PURE__ */ new Date()).toISOString(),
     ...process.env.RUNNER_TEMP && { tempDir: process.env.RUNNER_TEMP },
     octokit

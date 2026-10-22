@@ -22,10 +22,23 @@ lists each finding with a remediation. `best_effort: true` converts such views
 anyway and reports the differences.
 
 After each deploy the action reads the data model's columns back. If any column
-did not resolve (type `error`), it treats the deploy as failed:
+did not resolve (type `error`), or the check could not run, it treats the deploy
+as failed:
 
 - A new model is deleted.
 - An updated model is rolled back to its previous spec.
+
+**Updates keep Sigma's IDs.** Sigma assigns its own IDs to every element and
+column when a model is created, and workbooks reference those IDs. Before each
+update, the action pairs the new spec's objects with the live ones and reuses
+the live IDs, so dashboards built on the model keep working:
+
+- elements by what they read, then by name
+- columns by formula
+- metrics by name, then by formula
+- relationships by name
+
+Only genuinely new objects get new IDs.
 
 ## Quick start
 
@@ -63,7 +76,7 @@ The job needs `permissions: contents: write` to commit the lockfile. Use the
 | `sigma_client_id` / `sigma_client_secret` | — | OAuth client credentials (secrets). Required unless `dry_run`. |
 | `connection_id` or `connection_name` | — | Sigma connection the models read from (exactly one). |
 | `folder_id` or `folder_name` | — | Folder new models are created in (exactly one). |
-| `paths` | `**/*.{yml,yaml,sql}` | Glob(s), one per line. Files that aren't semantic views are skipped. |
+| `paths` | `**/*.{yml,yaml,sql}` | Glob(s), one per line. Files that aren't semantic views are skipped. A file counts as one when it has a `CREATE SEMANTIC VIEW` statement outside comments, or is YAML with a top-level `name` and a `tables` list. `.github/`, `node_modules/`, the lockfile and `specs_dir` are always excluded. |
 | `database` / `schema` | — | The views' database/schema (YAML has no qualifier), and the default for table references with fewer than 3 / 2 parts. |
 | `mode` | `auto` (`all` on `workflow_dispatch`) | `auto`: views whose file, engine version or options changed. `all`: every view. |
 | `dry_run` | `true` on pull requests | Convert and report only. Writes nothing to Sigma or the repo. |
@@ -109,10 +122,19 @@ Each is a JSON array of view keys.
   can delete it.
 - **Deleted models.** If you delete a tracked model in Sigma, run the workflow
   manually (`mode: all`). The view is recreated with a warning.
+- **Latest state first.** Before reading the lockfile, the action fetches the
+  branch tip and fast-forwards to it. This unshallows `actions/checkout`'s
+  depth-1 clone. A second push made while the first sync was still running
+  therefore sees the first sync's lockfile.
 - **Protected branches.** If the push fails, the run fails, because Sigma was
   already updated. The lockfile goes into the run artifact, and the summary
   lists every id. Use `commit_mode: pull_request` to get a `sigma-sync/state`
   PR instead (needs `pull-requests: write`).
+  - Until that PR is merged, each run overlays the PR branch's lockfile, so nothing it records is lost.
+  - A PR opened with the default `GITHUB_TOKEN` does not trigger other workflows. If the branch has required checks, pass a PAT or GitHub App token as `github_token`.
+- **Files that stop parsing.** If a file that defined a tracked view stops
+  reading as a semantic view, or defines a view twice, the run fails with an
+  error. Its view is not marked orphaned.
 - **Fork pull requests** get no secrets. The dry run then works offline: it
   converts the views and reports findings, and says which Sigma checks it
   skipped.
